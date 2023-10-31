@@ -2,12 +2,16 @@
 
 namespace PhpFramework\Html\Validation;
 
+use PhpFramework\Database\Attributes\Field;
+use PhpFramework\Database\DbTable;
+
 interface IValidationRule
 {
     public function __construct(
         ?string $NotValidMessage = null,
-        ?string $Helper = null
+        ?string $Helper = null,
+        ?Field &$Field = null
     );
 
-    public function Validate(mixed $value): bool;
+    public function Validate(mixed $value, ?DbTable $Table = null): bool;
 }

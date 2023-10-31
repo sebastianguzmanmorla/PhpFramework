@@ -77,6 +77,15 @@ class Table
         return null;
     }
 
+    public function GetFilters(): Generator
+    {
+        foreach ($this->Fields() as $Field) {
+            if ($Field->Filter !== null) {
+                yield $Field;
+            }
+        }
+    }
+
     public function SetPrimaryKey(DbTable &$Table, int $id): void
     {
         $PrimaryKey = $this->GetPrimaryKey();

@@ -2,6 +2,8 @@
 
 namespace PhpFramework\Html\Validation\Rules;
 
+use PhpFramework\Database\Attributes\Field;
+use PhpFramework\Database\DbTable;
 use PhpFramework\Html\Validation\IValidationRule;
 
 class IsValidRut implements IValidationRule
@@ -12,13 +14,14 @@ class IsValidRut implements IValidationRule
 
     public function __construct(
         ?string $NotValidMessage = null,
-        ?string $Helper = null
+        ?string $Helper = null,
+        ?Field &$Field = null
     ) {
-        $this->NotValidMessage = $NotValidMessage ?? 'El RUT ingresado no es válido';
+        $this->NotValidMessage = $NotValidMessage ?? 'El Valor de ' . ($Field?->Label ?? 'Valor') . ' ingresado no es válido';
         $this->Helper = $Helper;
     }
 
-    public function Validate(mixed $value): bool
+    public function Validate(mixed $value, ?DbTable $Table = null): bool
     {
         if (!preg_match('/^[0-9]+-[0-9kK]{1}/', $value)) {
             return false;

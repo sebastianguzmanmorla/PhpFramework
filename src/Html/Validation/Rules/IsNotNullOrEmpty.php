@@ -2,6 +2,8 @@
 
 namespace PhpFramework\Html\Validation\Rules;
 
+use PhpFramework\Database\Attributes\Field;
+use PhpFramework\Database\DbTable;
 use PhpFramework\Html\Validation\IValidationRule;
 
 class IsNotNullOrEmpty implements IValidationRule
@@ -12,13 +14,14 @@ class IsNotNullOrEmpty implements IValidationRule
 
     public function __construct(
         ?string $NotValidMessage = null,
-        ?string $Helper = null
+        ?string $Helper = null,
+        ?Field &$Field = null
     ) {
-        $this->NotValidMessage = $NotValidMessage ?? 'El valor no puede ser nulo o vacío';
+        $this->NotValidMessage = $NotValidMessage ?? 'El Valor de ' . ($Field?->Label ?? 'Valor') . ' no puede ser nulo o vacío';
         $this->Helper = $Helper;
     }
 
-    public function Validate(mixed $value): bool
+    public function Validate(mixed $value, ?DbTable $Table = null): bool
     {
         return $value !== null && $value !== '';
     }

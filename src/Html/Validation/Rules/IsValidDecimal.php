@@ -2,6 +2,8 @@
 
 namespace PhpFramework\Html\Validation\Rules;
 
+use PhpFramework\Database\Attributes\Field;
+use PhpFramework\Database\DbTable;
 use PhpFramework\Html\Validation\IValidationRule;
 
 class IsValidDecimal implements IValidationRule
@@ -13,14 +15,15 @@ class IsValidDecimal implements IValidationRule
     public function __construct(
         ?string $NotValidMessage = null,
         ?string $Helper = null,
+        ?Field &$Field = null,
         public int $NumericoMax = 8,
         public int $DecimalMax = 2
     ) {
-        $this->NotValidMessage = $NotValidMessage ?? 'El valor no es un decimal válido';
+        $this->NotValidMessage = $NotValidMessage ?? 'El Valor de ' . ($Field?->Label ?? 'Valor') . ' no es un decimal válido';
         $this->Helper = $Helper;
     }
 
-    public function Validate(mixed $value): bool
+    public function Validate(mixed $value, ?DbTable $Table = null): bool
     {
         return preg_match(static::RegexDecimal($this->NumericoMax, $this->DecimalMax), $value);
     }

@@ -3,6 +3,7 @@
 namespace PhpFramework\Html\Validation;
 
 use Closure;
+use PhpFramework\Database\DbTable;
 use PhpFramework\Html\Html;
 
 class Validation
@@ -36,7 +37,7 @@ class Validation
         return $Helpers;
     }
 
-    final public function Validate(): bool
+    final public function Validate(?DbTable $Context = null): bool
     {
         $this->Errors = [];
 
@@ -45,7 +46,7 @@ class Validation
         $Valid = true;
 
         foreach ($this->Rules as $Rule) {
-            if (!$Rule->Validate($Value)) {
+            if (!$Rule->Validate($Value, $Context)) {
                 $this->Errors[] = new Html(Dom: 'p', Class: 'my-1', Content: $Rule->NotValidMessage);
                 $Valid = false;
             }
