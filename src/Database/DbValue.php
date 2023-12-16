@@ -23,15 +23,6 @@ class DbValue
     ) {
     }
 
-    public function GetParameterMarker(): string
-    {
-        if ($this->ParameterMarker instanceof Closure) {
-            return $this->ParameterMarker->__invoke();
-        }
-
-        return $this->ParameterMarker;
-    }
-
     public function __toString()
     {
         $Return = [];
@@ -113,5 +104,14 @@ class DbValue
         }
 
         return implode(' ', $Return);
+    }
+
+    public function GetParameterMarker(): string
+    {
+        if ($this->ParameterMarker instanceof Closure) {
+            return $this->ParameterMarker->__invoke();
+        }
+
+        return $this->ParameterMarker;
     }
 }

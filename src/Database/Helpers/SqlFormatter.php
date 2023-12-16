@@ -35,6 +35,64 @@ class SqlFormatter
     public const TOKEN_TYPE = 0;
     public const TOKEN_VALUE = 1;
 
+    // For HTML syntax highlighting
+    // Styles applied to different token types
+    public static $quote_attributes = 'style="color: blue;"';
+
+    public static $backtick_quote_attributes = 'style="color: purple;"';
+
+    public static $reserved_attributes = 'style="font-weight:bold;"';
+
+    public static $boundary_attributes = '';
+
+    public static $number_attributes = 'style="color: green;"';
+
+    public static $word_attributes = 'style="color: #333;"';
+
+    public static $error_attributes = 'style="background-color: red;"';
+
+    public static $comment_attributes = 'style="color: #aaa;"';
+
+    public static $variable_attributes = 'style="color: orange;"';
+
+    public static $pre_attributes = 'style="color: black; background-color: white;"';
+
+    // Boolean - whether or not the current environment is the CLI
+    // This affects the type of syntax highlighting
+    // If not defined, it will be determined automatically
+    public static $cli;
+
+    // For CLI syntax highlighting
+    public static $cli_quote = "\x1b[34;1m";
+
+    public static $cli_backtick_quote = "\x1b[35;1m";
+
+    public static $cli_reserved = "\x1b[37m";
+
+    public static $cli_boundary = '';
+
+    public static $cli_number = "\x1b[32;1m";
+
+    public static $cli_word = '';
+
+    public static $cli_error = "\x1b[31;1;7m";
+
+    public static $cli_comment = "\x1b[30;1m";
+
+    public static $cli_functions = "\x1b[37m";
+
+    public static $cli_variable = "\x1b[36;1m";
+
+    // The tab character to use when formatting SQL
+    public static $tab = '  ';
+
+    // This flag tells us if queries need to be enclosed in <pre> tags
+    public static $use_pre = true;
+
+    // Cache variables
+    // Only tokens shorter than this size will be cached.  Somewhere between 10 and 20 seems to work well for most cases.
+    public static $max_cachekey_size = 15;
+
     // Reserved words (for syntax highlighting)
     protected static $reserved = [
         'ACCESSIBLE', 'ACTION', 'AGAINST', 'AGGREGATE', 'ALGORITHM', 'ALL', 'ALTER', 'ANALYSE', 'ANALYZE', 'AS', 'ASC',
@@ -107,60 +165,6 @@ class SqlFormatter
     // Punctuation that can be used as a boundary between other tokens
     protected static $boundaries = [',', ';', ':', ')', '(', '.', '=', '<', '>', '+', '-', '*', '/', '!', '^', '%', '|', '&', '#'];
 
-    // For HTML syntax highlighting
-    // Styles applied to different token types
-    public static $quote_attributes = 'style="color: blue;"';
-
-    public static $backtick_quote_attributes = 'style="color: purple;"';
-
-    public static $reserved_attributes = 'style="font-weight:bold;"';
-
-    public static $boundary_attributes = '';
-
-    public static $number_attributes = 'style="color: green;"';
-
-    public static $word_attributes = 'style="color: #333;"';
-
-    public static $error_attributes = 'style="background-color: red;"';
-
-    public static $comment_attributes = 'style="color: #aaa;"';
-
-    public static $variable_attributes = 'style="color: orange;"';
-
-    public static $pre_attributes = 'style="color: black; background-color: white;"';
-
-    // Boolean - whether or not the current environment is the CLI
-    // This affects the type of syntax highlighting
-    // If not defined, it will be determined automatically
-    public static $cli;
-
-    // For CLI syntax highlighting
-    public static $cli_quote = "\x1b[34;1m";
-
-    public static $cli_backtick_quote = "\x1b[35;1m";
-
-    public static $cli_reserved = "\x1b[37m";
-
-    public static $cli_boundary = '';
-
-    public static $cli_number = "\x1b[32;1m";
-
-    public static $cli_word = '';
-
-    public static $cli_error = "\x1b[31;1;7m";
-
-    public static $cli_comment = "\x1b[30;1m";
-
-    public static $cli_functions = "\x1b[37m";
-
-    public static $cli_variable = "\x1b[36;1m";
-
-    // The tab character to use when formatting SQL
-    public static $tab = '  ';
-
-    // This flag tells us if queries need to be enclosed in <pre> tags
-    public static $use_pre = true;
-
     // This flag tells us if SqlFormatted has been initialized
     protected static $init;
 
@@ -174,10 +178,6 @@ class SqlFormatter
     protected static $regex_reserved_toplevel;
 
     protected static $regex_function;
-
-    // Cache variables
-    // Only tokens shorter than this size will be cached.  Somewhere between 10 and 20 seems to work well for most cases.
-    public static $max_cachekey_size = 15;
 
     protected static $token_cache = [];
 
@@ -198,257 +198,6 @@ class SqlFormatter
             'entries' => count(self::$token_cache),
             'size' => strlen(serialize(self::$token_cache)),
         ];
-    }
-
-    /**
-     * Stuff that only needs to be done once.  Builds regular expressions and sorts the reserved words.
-     */
-    protected static function init(): void
-    {
-        if (self::$init) {
-            return;
-        }
-
-        // Sort reserved word list from longest word to shortest, 3x faster than usort
-        $reservedMap = array_combine(self::$reserved, array_map('strlen', self::$reserved));
-        arsort($reservedMap);
-        self::$reserved = array_keys($reservedMap);
-
-        // Set up regular expressions
-        self::$regex_boundaries = '(' . implode('|', array_map([__CLASS__, 'quote_regex'], self::$boundaries)) . ')';
-        self::$regex_reserved = '(' . implode('|', array_map([__CLASS__, 'quote_regex'], self::$reserved)) . ')';
-        self::$regex_reserved_toplevel = str_replace(' ', '\\s+', '(' . implode('|', array_map([__CLASS__, 'quote_regex'], self::$reserved_toplevel)) . ')');
-        self::$regex_reserved_newline = str_replace(' ', '\\s+', '(' . implode('|', array_map([__CLASS__, 'quote_regex'], self::$reserved_newline)) . ')');
-
-        self::$regex_function = '(' . implode('|', array_map([__CLASS__, 'quote_regex'], self::$functions)) . ')';
-
-        self::$init = true;
-    }
-
-    /**
-     * Return the next token and token type in a SQL string.
-     * Quoted strings, comments, reserved words, whitespace, and punctuation are all their own tokens.
-     *
-     * @param string $string   The SQL string
-     * @param array  $previous The result of the previous getNextToken() call
-     *
-     * @return array an associative array containing the type and value of the token
-     */
-    protected static function getNextToken($string, $previous = null)
-    {
-        // Whitespace
-        if (preg_match('/^\s+/', $string, $matches)) {
-            return [
-                self::TOKEN_VALUE => $matches[0],
-                self::TOKEN_TYPE => self::TOKEN_TYPE_WHITESPACE,
-            ];
-        }
-
-        // Comment
-        if ($string[0] === '#' || (isset($string[1]) && ($string[0] === '-' && $string[1] === '-') || ($string[0] === '/' && $string[1] === '*'))) {
-            // Comment until end of line
-            if ($string[0] === '-' || $string[0] === '#') {
-                $last = strpos($string, "\n");
-                $type = self::TOKEN_TYPE_COMMENT;
-            } else { // Comment until closing comment tag
-                $last = strpos($string, '*/', 2) + 2;
-                $type = self::TOKEN_TYPE_BLOCK_COMMENT;
-            }
-
-            if ($last === false) {
-                $last = strlen($string);
-            }
-
-            return [
-                self::TOKEN_VALUE => substr($string, 0, $last),
-                self::TOKEN_TYPE => $type,
-            ];
-        }
-
-        // Quoted String
-        if ($string[0] === '"' || $string[0] === '\'' || $string[0] === '`' || $string[0] === '[') {
-            $return = [
-                self::TOKEN_TYPE => (($string[0] === '`' || $string[0] === '[') ? self::TOKEN_TYPE_BACKTICK_QUOTE : self::TOKEN_TYPE_QUOTE),
-                self::TOKEN_VALUE => self::getQuotedString($string),
-            ];
-
-            return $return;
-        }
-
-        // User-defined Variable
-        if (($string[0] === '@' || $string[0] === ':') && isset($string[1])) {
-            $ret = [
-                self::TOKEN_VALUE => null,
-                self::TOKEN_TYPE => self::TOKEN_TYPE_VARIABLE,
-            ];
-
-            // If the variable name is quoted
-            if ($string[1] === '"' || $string[1] === '\'' || $string[1] === '`') {
-                $ret[self::TOKEN_VALUE] = $string[0] . self::getQuotedString(substr($string, 1));
-            }
-            // Non-quoted variable name
-            else {
-                preg_match('/^(' . $string[0] . '[a-zA-Z0-9\._\$]+)/', $string, $matches);
-                if ($matches) {
-                    $ret[self::TOKEN_VALUE] = $matches[1];
-                }
-            }
-
-            if ($ret[self::TOKEN_VALUE] !== null) {
-                return $ret;
-            }
-        }
-
-        // Number (decimal, binary, or hex)
-        if (preg_match('/^([0-9]+(\.[0-9]+)?|0x[0-9a-fA-F]+|0b[01]+)($|\s|"\'`|' . self::$regex_boundaries . ')/', $string, $matches)) {
-            return [
-                self::TOKEN_VALUE => $matches[1],
-                self::TOKEN_TYPE => self::TOKEN_TYPE_NUMBER,
-            ];
-        }
-
-        // Boundary Character (punctuation and symbols)
-        if (preg_match('/^(' . self::$regex_boundaries . ')/', $string, $matches)) {
-            return [
-                self::TOKEN_VALUE => $matches[1],
-                self::TOKEN_TYPE => self::TOKEN_TYPE_BOUNDARY,
-            ];
-        }
-
-        // A reserved word cannot be preceded by a '.'
-        // this makes it so in "mytable.from", "from" is not considered a reserved word
-        if (!$previous || !isset($previous[self::TOKEN_VALUE]) || $previous[self::TOKEN_VALUE] !== '.') {
-            $upper = strtoupper($string);
-            // Top Level Reserved Word
-            if (preg_match('/^(' . self::$regex_reserved_toplevel . ')($|\s|' . self::$regex_boundaries . ')/', $upper, $matches)) {
-                return [
-                    self::TOKEN_TYPE => self::TOKEN_TYPE_RESERVED_TOPLEVEL,
-                    self::TOKEN_VALUE => substr($string, 0, strlen($matches[1])),
-                ];
-            }
-            // Newline Reserved Word
-            if (preg_match('/^(' . self::$regex_reserved_newline . ')($|\s|' . self::$regex_boundaries . ')/', $upper, $matches)) {
-                return [
-                    self::TOKEN_TYPE => self::TOKEN_TYPE_RESERVED_NEWLINE,
-                    self::TOKEN_VALUE => substr($string, 0, strlen($matches[1])),
-                ];
-            }
-            // Other Reserved Word
-            if (preg_match('/^(' . self::$regex_reserved . ')($|\s|' . self::$regex_boundaries . ')/', $upper, $matches)) {
-                return [
-                    self::TOKEN_TYPE => self::TOKEN_TYPE_RESERVED,
-                    self::TOKEN_VALUE => substr($string, 0, strlen($matches[1])),
-                ];
-            }
-        }
-
-        // A function must be suceeded by '('
-        // this makes it so "count(" is considered a function, but "count" alone is not
-        $upper = strtoupper($string);
-        // function
-        if (preg_match('/^(' . self::$regex_function . '[(]|\s|[)])/', $upper, $matches)) {
-            return [
-                self::TOKEN_TYPE => self::TOKEN_TYPE_RESERVED,
-                self::TOKEN_VALUE => substr($string, 0, strlen($matches[1]) - 1),
-            ];
-        }
-
-        // Non reserved word
-        preg_match('/^(.*?)($|\s|["\'`]|' . self::$regex_boundaries . ')/', $string, $matches);
-
-        return [
-            self::TOKEN_VALUE => $matches[1],
-            self::TOKEN_TYPE => self::TOKEN_TYPE_WORD,
-        ];
-    }
-
-    protected static function getQuotedString($string)
-    {
-        $ret = null;
-
-        // This checks for the following patterns:
-        // 1. backtick quoted string using `` to escape
-        // 2. square bracket quoted string (SQL Server) using ]] to escape
-        // 3. double quoted string using "" or \" to escape
-        // 4. single quoted string using '' or \' to escape
-        if (preg_match('/^(((`[^`]*($|`))+)|((\[[^\]]*($|\]))(\][^\]]*($|\]))*)|(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)|((\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*(\'|$))+))/s', $string, $matches)) {
-            $ret = $matches[1];
-        }
-
-        return $ret;
-    }
-
-    /**
-     * Takes a SQL string and breaks it into tokens.
-     * Each token is an associative array with type and value.
-     *
-     * @param string $string The SQL string
-     *
-     * @return array an array of tokens
-     */
-    protected static function tokenize($string)
-    {
-        self::init();
-
-        $tokens = [];
-
-        // Used for debugging if there is an error while tokenizing the string
-        $original_length = strlen($string);
-
-        // Used to make sure the string keeps shrinking on each iteration
-        $old_string_len = strlen($string) + 1;
-
-        $token = null;
-
-        $current_length = strlen($string);
-
-        // Keep processing the string until it is empty
-        while ($current_length) {
-            // If the string stopped shrinking, there was a problem
-            if ($old_string_len <= $current_length) {
-                $tokens[] = [
-                    self::TOKEN_VALUE => $string,
-                    self::TOKEN_TYPE => self::TOKEN_TYPE_ERROR,
-                ];
-
-                return $tokens;
-            }
-            $old_string_len = $current_length;
-
-            // Determine if we can use caching
-            if ($current_length >= self::$max_cachekey_size) {
-                $cacheKey = substr($string, 0, self::$max_cachekey_size);
-            } else {
-                $cacheKey = false;
-            }
-
-            // See if the token is already cached
-            if ($cacheKey && isset(self::$token_cache[$cacheKey])) {
-                // Retrieve from cache
-                $token = self::$token_cache[$cacheKey];
-                $token_length = strlen($token[self::TOKEN_VALUE]);
-                ++self::$cache_hits;
-            } else {
-                // Get the next token and the token type
-                $token = self::getNextToken($string, $token);
-                $token_length = strlen($token[self::TOKEN_VALUE]);
-                ++self::$cache_misses;
-
-                // If the token is shorter than the max length, store it in cache
-                if ($cacheKey && $token_length < self::$max_cachekey_size) {
-                    self::$token_cache[$cacheKey] = $token;
-                }
-            }
-
-            $tokens[] = $token;
-
-            // Advance the string
-            $string = substr($string, $token_length);
-
-            $current_length -= $token_length;
-        }
-
-        return $tokens;
     }
 
     /**
@@ -887,6 +636,257 @@ class SqlFormatter
         }
 
         return rtrim($result);
+    }
+
+    /**
+     * Stuff that only needs to be done once.  Builds regular expressions and sorts the reserved words.
+     */
+    protected static function init(): void
+    {
+        if (self::$init) {
+            return;
+        }
+
+        // Sort reserved word list from longest word to shortest, 3x faster than usort
+        $reservedMap = array_combine(self::$reserved, array_map('strlen', self::$reserved));
+        arsort($reservedMap);
+        self::$reserved = array_keys($reservedMap);
+
+        // Set up regular expressions
+        self::$regex_boundaries = '(' . implode('|', array_map([__CLASS__, 'quote_regex'], self::$boundaries)) . ')';
+        self::$regex_reserved = '(' . implode('|', array_map([__CLASS__, 'quote_regex'], self::$reserved)) . ')';
+        self::$regex_reserved_toplevel = str_replace(' ', '\\s+', '(' . implode('|', array_map([__CLASS__, 'quote_regex'], self::$reserved_toplevel)) . ')');
+        self::$regex_reserved_newline = str_replace(' ', '\\s+', '(' . implode('|', array_map([__CLASS__, 'quote_regex'], self::$reserved_newline)) . ')');
+
+        self::$regex_function = '(' . implode('|', array_map([__CLASS__, 'quote_regex'], self::$functions)) . ')';
+
+        self::$init = true;
+    }
+
+    /**
+     * Return the next token and token type in a SQL string.
+     * Quoted strings, comments, reserved words, whitespace, and punctuation are all their own tokens.
+     *
+     * @param string $string   The SQL string
+     * @param array  $previous The result of the previous getNextToken() call
+     *
+     * @return array an associative array containing the type and value of the token
+     */
+    protected static function getNextToken($string, $previous = null)
+    {
+        // Whitespace
+        if (preg_match('/^\s+/', $string, $matches)) {
+            return [
+                self::TOKEN_VALUE => $matches[0],
+                self::TOKEN_TYPE => self::TOKEN_TYPE_WHITESPACE,
+            ];
+        }
+
+        // Comment
+        if ($string[0] === '#' || (isset($string[1]) && ($string[0] === '-' && $string[1] === '-') || ($string[0] === '/' && $string[1] === '*'))) {
+            // Comment until end of line
+            if ($string[0] === '-' || $string[0] === '#') {
+                $last = strpos($string, "\n");
+                $type = self::TOKEN_TYPE_COMMENT;
+            } else { // Comment until closing comment tag
+                $last = strpos($string, '*/', 2) + 2;
+                $type = self::TOKEN_TYPE_BLOCK_COMMENT;
+            }
+
+            if ($last === false) {
+                $last = strlen($string);
+            }
+
+            return [
+                self::TOKEN_VALUE => substr($string, 0, $last),
+                self::TOKEN_TYPE => $type,
+            ];
+        }
+
+        // Quoted String
+        if ($string[0] === '"' || $string[0] === '\'' || $string[0] === '`' || $string[0] === '[') {
+            $return = [
+                self::TOKEN_TYPE => (($string[0] === '`' || $string[0] === '[') ? self::TOKEN_TYPE_BACKTICK_QUOTE : self::TOKEN_TYPE_QUOTE),
+                self::TOKEN_VALUE => self::getQuotedString($string),
+            ];
+
+            return $return;
+        }
+
+        // User-defined Variable
+        if (($string[0] === '@' || $string[0] === ':') && isset($string[1])) {
+            $ret = [
+                self::TOKEN_VALUE => null,
+                self::TOKEN_TYPE => self::TOKEN_TYPE_VARIABLE,
+            ];
+
+            // If the variable name is quoted
+            if ($string[1] === '"' || $string[1] === '\'' || $string[1] === '`') {
+                $ret[self::TOKEN_VALUE] = $string[0] . self::getQuotedString(substr($string, 1));
+            }
+            // Non-quoted variable name
+            else {
+                preg_match('/^(' . $string[0] . '[a-zA-Z0-9\._\$]+)/', $string, $matches);
+                if ($matches) {
+                    $ret[self::TOKEN_VALUE] = $matches[1];
+                }
+            }
+
+            if ($ret[self::TOKEN_VALUE] !== null) {
+                return $ret;
+            }
+        }
+
+        // Number (decimal, binary, or hex)
+        if (preg_match('/^([0-9]+(\.[0-9]+)?|0x[0-9a-fA-F]+|0b[01]+)($|\s|"\'`|' . self::$regex_boundaries . ')/', $string, $matches)) {
+            return [
+                self::TOKEN_VALUE => $matches[1],
+                self::TOKEN_TYPE => self::TOKEN_TYPE_NUMBER,
+            ];
+        }
+
+        // Boundary Character (punctuation and symbols)
+        if (preg_match('/^(' . self::$regex_boundaries . ')/', $string, $matches)) {
+            return [
+                self::TOKEN_VALUE => $matches[1],
+                self::TOKEN_TYPE => self::TOKEN_TYPE_BOUNDARY,
+            ];
+        }
+
+        // A reserved word cannot be preceded by a '.'
+        // this makes it so in "mytable.from", "from" is not considered a reserved word
+        if (!$previous || !isset($previous[self::TOKEN_VALUE]) || $previous[self::TOKEN_VALUE] !== '.') {
+            $upper = strtoupper($string);
+            // Top Level Reserved Word
+            if (preg_match('/^(' . self::$regex_reserved_toplevel . ')($|\s|' . self::$regex_boundaries . ')/', $upper, $matches)) {
+                return [
+                    self::TOKEN_TYPE => self::TOKEN_TYPE_RESERVED_TOPLEVEL,
+                    self::TOKEN_VALUE => substr($string, 0, strlen($matches[1])),
+                ];
+            }
+            // Newline Reserved Word
+            if (preg_match('/^(' . self::$regex_reserved_newline . ')($|\s|' . self::$regex_boundaries . ')/', $upper, $matches)) {
+                return [
+                    self::TOKEN_TYPE => self::TOKEN_TYPE_RESERVED_NEWLINE,
+                    self::TOKEN_VALUE => substr($string, 0, strlen($matches[1])),
+                ];
+            }
+            // Other Reserved Word
+            if (preg_match('/^(' . self::$regex_reserved . ')($|\s|' . self::$regex_boundaries . ')/', $upper, $matches)) {
+                return [
+                    self::TOKEN_TYPE => self::TOKEN_TYPE_RESERVED,
+                    self::TOKEN_VALUE => substr($string, 0, strlen($matches[1])),
+                ];
+            }
+        }
+
+        // A function must be suceeded by '('
+        // this makes it so "count(" is considered a function, but "count" alone is not
+        $upper = strtoupper($string);
+        // function
+        if (preg_match('/^(' . self::$regex_function . '[(]|\s|[)])/', $upper, $matches)) {
+            return [
+                self::TOKEN_TYPE => self::TOKEN_TYPE_RESERVED,
+                self::TOKEN_VALUE => substr($string, 0, strlen($matches[1]) - 1),
+            ];
+        }
+
+        // Non reserved word
+        preg_match('/^(.*?)($|\s|["\'`]|' . self::$regex_boundaries . ')/', $string, $matches);
+
+        return [
+            self::TOKEN_VALUE => $matches[1],
+            self::TOKEN_TYPE => self::TOKEN_TYPE_WORD,
+        ];
+    }
+
+    protected static function getQuotedString($string)
+    {
+        $ret = null;
+
+        // This checks for the following patterns:
+        // 1. backtick quoted string using `` to escape
+        // 2. square bracket quoted string (SQL Server) using ]] to escape
+        // 3. double quoted string using "" or \" to escape
+        // 4. single quoted string using '' or \' to escape
+        if (preg_match('/^(((`[^`]*($|`))+)|((\[[^\]]*($|\]))(\][^\]]*($|\]))*)|(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)|((\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*(\'|$))+))/s', $string, $matches)) {
+            $ret = $matches[1];
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Takes a SQL string and breaks it into tokens.
+     * Each token is an associative array with type and value.
+     *
+     * @param string $string The SQL string
+     *
+     * @return array an array of tokens
+     */
+    protected static function tokenize($string)
+    {
+        self::init();
+
+        $tokens = [];
+
+        // Used for debugging if there is an error while tokenizing the string
+        $original_length = strlen($string);
+
+        // Used to make sure the string keeps shrinking on each iteration
+        $old_string_len = strlen($string) + 1;
+
+        $token = null;
+
+        $current_length = strlen($string);
+
+        // Keep processing the string until it is empty
+        while ($current_length) {
+            // If the string stopped shrinking, there was a problem
+            if ($old_string_len <= $current_length) {
+                $tokens[] = [
+                    self::TOKEN_VALUE => $string,
+                    self::TOKEN_TYPE => self::TOKEN_TYPE_ERROR,
+                ];
+
+                return $tokens;
+            }
+            $old_string_len = $current_length;
+
+            // Determine if we can use caching
+            if ($current_length >= self::$max_cachekey_size) {
+                $cacheKey = substr($string, 0, self::$max_cachekey_size);
+            } else {
+                $cacheKey = false;
+            }
+
+            // See if the token is already cached
+            if ($cacheKey && isset(self::$token_cache[$cacheKey])) {
+                // Retrieve from cache
+                $token = self::$token_cache[$cacheKey];
+                $token_length = strlen($token[self::TOKEN_VALUE]);
+                ++self::$cache_hits;
+            } else {
+                // Get the next token and the token type
+                $token = self::getNextToken($string, $token);
+                $token_length = strlen($token[self::TOKEN_VALUE]);
+                ++self::$cache_misses;
+
+                // If the token is shorter than the max length, store it in cache
+                if ($cacheKey && $token_length < self::$max_cachekey_size) {
+                    self::$token_cache[$cacheKey] = $token;
+                }
+            }
+
+            $tokens[] = $token;
+
+            // Advance the string
+            $string = substr($string, $token_length);
+
+            $current_length -= $token_length;
+        }
+
+        return $tokens;
     }
 
     /**

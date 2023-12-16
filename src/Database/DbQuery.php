@@ -20,6 +20,19 @@ class DbQuery
     ) {
     }
 
+    public function __toString(): string
+    {
+        $Query = $this->ToSql();
+
+        $Parameters = $this->Parameters;
+        while (str_contains($Query, '?')) {
+            $Value = array_shift($Parameters);
+            $Query = substr_replace($Query, "'" . $Value . "'", strpos($Query, '?'), 1);
+        }
+
+        return $Query;
+    }
+
     public function ToSql(Closure|string|null $ParameterMarker = null, bool $UpdateSetIgnore = false): string
     {
         $Sql = [];
@@ -39,18 +52,5 @@ class DbQuery
         $this->Query = [SqlFormatter::format(implode(' ', $Sql), false)];
 
         return $this->Query[0];
-    }
-
-    public function __toString(): string
-    {
-        $Query = $this->ToSql();
-
-        $Parameters = $this->Parameters;
-        while (str_contains($Query, '?')) {
-            $Value = array_shift($Parameters);
-            $Query = substr_replace($Query, "'" . $Value . "'", strpos($Query, '?'), 1);
-        }
-
-        return $Query;
     }
 }

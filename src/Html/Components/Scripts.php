@@ -6,11 +6,6 @@ class Scripts
 {
     private array $Scripts = [];
 
-    public function Add(Script ...$Script): void
-    {
-        array_push($this->Scripts, ...$Script);
-    }
-
     public function __toString(): string
     {
         $Result = '';
@@ -19,5 +14,10 @@ class Scripts
         }
 
         return $Result;
+    }
+
+    public function Add(Script ...$Script): void
+    {
+        array_push($this->Scripts, ...$Script);
     }
 }

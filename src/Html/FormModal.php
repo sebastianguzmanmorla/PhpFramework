@@ -23,9 +23,9 @@ class FormModal extends Form
         ?bool $AutoComplete = null,
         ?bool $NoValidate = null,
         public ModalDialog $ModalDialog = ModalDialog::Default,
-        public string|Html|null $ModalTitle = '',
-        public string|Html|null $ModalBody = null,
-        public string|Html|false|null $ModalFooter = null,
+        public string|Markup|null $ModalTitle = '',
+        public string|Markup|null $ModalBody = null,
+        public string|Markup|false|null $ModalFooter = null,
         public ?HtmlResponse $ModalView = null,
         public array $Values = [],
         public ?Closure $Init = null
@@ -153,7 +153,7 @@ $(function() {
     {
         echo $this->Open();
         foreach ($this->Values as $Id => $Value) {
-            echo new Html(Dom: 'input', Id: $Id, Name: $Id, Type: InputType::Hidden, Value: $Value);
+            echo new Markup(Dom: 'input', Id: $Id, Name: $Id, Type: InputType::Hidden, Value: $Value);
         }
         ?>
         <div class="modal-dialog <?= $this->ModalDialog->value ?>">

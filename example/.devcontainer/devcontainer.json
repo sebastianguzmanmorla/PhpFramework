@@ -1,0 +1,18 @@
+{
+    "dockerComposeFile": "./../.docker/docker-compose.yaml",
+    "service": "app",
+    "shutdownAction": "stopCompose",
+	"workspaceFolder": "/var/www/",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"formulahendry.auto-rename-tag",
+				"mohd-akram.vscode-html-format",
+				"xdebug.php-debug",
+				"zobo.php-intellisense",
+				"bmewburn.vscode-intelephense-client",
+				"GitHub.copilot"
+			]
+		}
+	}
+}

@@ -19,7 +19,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "PhpFramework\\": "src/"
+            "PhpFramework\\": ["src/"]
         }
     },
     "authors": [
@@ -29,9 +29,6 @@
         }
     ],
     "scripts": {
-        "check": [
-            "php-cs-fixer fix --ansi --dry-run --diff"
-        ],
         "fix": [
             "php-cs-fixer fix"
         ]

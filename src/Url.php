@@ -14,11 +14,6 @@ class Url
 {
     public string $Url;
 
-    public function __toString(): string
-    {
-        return $this->Url;
-    }
-
     public function __construct(Closure|string $Url)
     {
         if ($Url instanceof Closure) {
@@ -200,5 +195,10 @@ class Url
         } else {
             $this->Url = $Url;
         }
+    }
+
+    public function __toString(): string
+    {
+        return $this->Url;
     }
 }

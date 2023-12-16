@@ -4,6 +4,7 @@ namespace PhpFramework\Database\Attributes;
 
 use Attribute;
 use Generator;
+use PhpFramework\Database\DbQuery;
 use PhpFramework\Database\DbSchema;
 use PhpFramework\Database\DbTable;
 use PhpFramework\Database\DbValue;
@@ -40,6 +41,27 @@ class Table
         }
     }
 
+    public function __toString()
+    {
+        return $this->DbSchema->Schema->__toString() . '.' . $this->Name;
+    }
+
+    public function CreateSyntax(): DbQuery
+    {
+        $Fields = iterator_to_array($this->Fields());
+        $PrimaryKeys = iterator_to_array($this->GetPrimaryKey());
+
+        return new DbQuery(Query: ["CREATE TABLE IF NOT EXISTS `{$this->DbSchema->Schema->Name}`.`{$this->Name}` ("
+            . implode(', ', array_map(fn (Field $Field) => "`{$Field->Field}` "
+                . ($Field->Type != null ? $Field->Type->value : '')
+                . ($Field->FieldLength !== null ? "({$Field->FieldLength})" : '')
+                . ($Field->AllowNull ? '' : ' NOT NULL')
+                . ($Field->AutoIncrement ? ' AUTO_INCREMENT' : '')
+                . ($Field->Default !== null ? " DEFAULT '{$Field->Default}'" : ''), $Fields))
+            . (empty($PrimaryKeys) ? '' : ', PRIMARY KEY (`' . implode('`, `', array_map(fn (Field $Field) => $Field->Field, $PrimaryKeys)) . '`)')
+            . ');']);
+    }
+
     public function Field(string $Name): ?Field
     {
         return $this->Reflection->hasProperty($Name) ? $this->Reflection->getProperty($Name)->getValue($this->DbTable) : null;
@@ -66,15 +88,13 @@ class Table
         }
     }
 
-    public function GetPrimaryKey(): ?Field
+    public function GetPrimaryKey(): Generator
     {
         foreach ($this->Fields() as $Field) {
             if ($Field->PrimaryKey) {
-                return $Field;
+                yield $Field;
             }
         }
-
-        return null;
     }
 
     public function GetFilters(): Generator
@@ -93,10 +113,5 @@ class Table
         if ($PrimaryKey !== null) {
             $PrimaryKey->Reflection->setValue($Table, $id);
         }
-    }
-
-    public function __toString()
-    {
-        return $this->DbSchema->Schema->__toString() . '.' . $this->Name;
     }
 }

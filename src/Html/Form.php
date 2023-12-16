@@ -13,6 +13,21 @@ use PhpFramework\Url;
 #[Attribute(Attribute::TARGET_CLASS)]
 class Form
 {
+    public function __construct(
+        public ?string $Id = null,
+        public Url|Closure|string|null $Action = null,
+        public ?string $Class = null,
+        public FormMethod $Method = FormMethod::POST,
+        public ?Target $Target = null,
+        public EncType $EncType = EncType::Default,
+        public ?bool $AutoComplete = null,
+        public ?bool $NoValidate = null,
+        public ?int $TabIndex = null,
+        public ?string $Role = null,
+        public ?bool $AriaHidden = null
+    ) {
+    }
+
     public function Open(): string
     {
         $Route = null;
@@ -48,20 +63,5 @@ class Form
     public function Close(): string
     {
         return '</form>';
-    }
-
-    public function __construct(
-        public ?string $Id = null,
-        public Url|Closure|string|null $Action = null,
-        public ?string $Class = null,
-        public FormMethod $Method = FormMethod::POST,
-        public ?Target $Target = null,
-        public EncType $EncType = EncType::Default,
-        public ?bool $AutoComplete = null,
-        public ?bool $NoValidate = null,
-        public ?int $TabIndex = null,
-        public ?string $Role = null,
-        public ?bool $AriaHidden = null
-    ) {
     }
 }

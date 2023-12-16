@@ -8,11 +8,6 @@ use ReflectionClass;
 
 class DbTable implements ArrayAccess, JsonSerializable
 {
-    public function jsonSerialize(): mixed
-    {
-        return $this;
-    }
-
     public function __isset(string $name): bool
     {
         $Reflection = new ReflectionClass($this);
@@ -48,6 +43,11 @@ class DbTable implements ArrayAccess, JsonSerializable
             $Property = $Reflection->getProperty($name);
             $Property->setValue($this, null);
         }
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return $this;
     }
 
     public function offsetExists(mixed $offset): bool

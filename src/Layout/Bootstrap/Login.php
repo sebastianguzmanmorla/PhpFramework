@@ -4,9 +4,10 @@ namespace PhpFramework\Layout\Bootstrap;
 
 use PhpFramework\Html\Components\Script as ComponentsScript;
 use PhpFramework\Html\Components\Stylesheet;
-use PhpFramework\Html\Html;
+use PhpFramework\Html\Markup;
 use PhpFramework\Layout\Layout;
 use PhpFramework\Layout\Section\Script;
+use PhpFramework\Layout\Section\Toolbar;
 use PhpFramework\Response\HtmlResponse;
 
 class Login extends Layout
@@ -40,7 +41,7 @@ class Login extends Layout
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?= new Html(Dom: 'title', Content: $Context->Title ?? '') ?>
+<?= new Markup(Dom: 'title', Content: $Context->Title ?? '') ?>
 <?= $Context->Stylesheets ?>
 </head>
 <body class="bg-dark">
@@ -49,22 +50,36 @@ class Login extends Layout
         <i class="fa fa-fw fa-10x fa-cog text-white"></i>
     </div>
     <div class="col p-3 align-self-start">
+        <?= $Context->Form?->Open() ?>
         <div class="card">
-            <div class="card-body">
-                <?= $Context->Form?->Open() ?>
-                <?= $Context->Body() ?>
-                <?= $Context->Form?->Close() ?>
+            <div class="card-header text-bg-success">
+                <h5 class="card-title my-0 text-center"><?= $Context->Title ?></h5>
             </div>
+            <div class="card-body">
+                <?= $Context->Body() ?>
+            </div>
+<?php
+            if ($Context instanceof Toolbar) {
+                ?>
+            <div class="card-footer p-0">
+                <div class="btn-group-vertical d-flex" role="group" aria-label="Login Actions">
+                    <?= $Context->Toolbar() ?>
+                </div>
+            </div>
+<?php
+            }
+        ?>
         </div>
+        <?= $Context->Form?->Close() ?>
     </div>
 </div>
 <div class="fixed-bottom d-md-none text-center pb-4" style="z-index:-1;">
     <i class="fa fa-fw fa-5x fa-cog text-white"></i>
 </div>
 <?php
-        foreach ($Context->Scripts() as $Script) {
-            echo $Script;
-        }
+                foreach ($Context->Scripts() as $Script) {
+                    echo $Script;
+                }
         ?>
 <?= $Context instanceof Script ? $Context->Script() : null ?>
 </body>

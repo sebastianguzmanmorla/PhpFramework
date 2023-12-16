@@ -37,6 +37,31 @@ class DbResourceSet implements ArrayAccess, Iterator, JsonSerializable
         $this->Limit = $Limit;
     }
 
+    public function __get($key): mixed
+    {
+        return $this->current()->__get($key);
+    }
+
+    public function __set($key, $value): void
+    {
+        $this->current()->__set($key, $value);
+    }
+
+    public function __isset($key): bool
+    {
+        return $this->current()->__isset($key);
+    }
+
+    public function __unset($key): void
+    {
+        $this->current()->__unset($key);
+    }
+
+    public function __toString()
+    {
+        return json_encode($this->Data[$this->Index]);
+    }
+
     public function RecordCount(): int
     {
         return $this->Rows;
@@ -90,11 +115,6 @@ class DbResourceSet implements ArrayAccess, Iterator, JsonSerializable
         $this->EOF = !isset($this->Data[$this->Index]);
     }
 
-    public function __get($key): mixed
-    {
-        return $this->current()->__get($key);
-    }
-
     public function offsetGet($key): mixed
     {
         return $this->current()->__get($key);
@@ -105,29 +125,14 @@ class DbResourceSet implements ArrayAccess, Iterator, JsonSerializable
         return $this->current()->__get($key);
     }
 
-    public function __set($key, $value): void
-    {
-        $this->current()->__set($key, $value);
-    }
-
     public function offsetSet($key, $value): void
     {
         $this->current()->__set($key, $value);
     }
 
-    public function __isset($key): bool
-    {
-        return $this->current()->__isset($key);
-    }
-
     public function offsetExists(mixed $key): bool
     {
         return $this->current()->__isset($key);
-    }
-
-    public function __unset($key): void
-    {
-        $this->current()->__unset($key);
     }
 
     public function offsetUnset($key): void
@@ -138,11 +143,6 @@ class DbResourceSet implements ArrayAccess, Iterator, JsonSerializable
     public function jsonSerialize(): mixed
     {
         return $this->Data;
-    }
-
-    public function __toString()
-    {
-        return json_encode($this->Data[$this->Index]);
     }
 
     /**

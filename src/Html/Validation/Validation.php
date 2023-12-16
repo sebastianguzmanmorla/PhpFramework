@@ -4,16 +4,18 @@ namespace PhpFramework\Html\Validation;
 
 use Closure;
 use PhpFramework\Database\DbTable;
-use PhpFramework\Html\Html;
+use PhpFramework\Html\Markup;
 
 class Validation
 {
+    public array $Errors = [];
+
+    private array $Rules = [];
+
     public function __construct(
         private Closure $Value
     ) {
     }
-
-    private array $Rules = [];
 
     final public function AddRule(IValidationRule ...$Rules): void
     {
@@ -22,15 +24,13 @@ class Validation
         }
     }
 
-    public array $Errors = [];
-
     final public function GetHelpers(): array
     {
         $Helpers = [];
 
         foreach ($this->Rules as $Rule) {
             if ($Rule->Helper !== null) {
-                $Helpers[] = new Html(Dom: 'p', Class: 'my-1', Content: $Rule->Helper);
+                $Helpers[] = new Markup(Dom: 'p', Class: 'my-1', Content: $Rule->Helper);
             }
         }
 
@@ -47,7 +47,7 @@ class Validation
 
         foreach ($this->Rules as $Rule) {
             if (!$Rule->Validate($Value, $Context)) {
-                $this->Errors[] = new Html(Dom: 'p', Class: 'my-1', Content: $Rule->NotValidMessage);
+                $this->Errors[] = new Markup(Dom: 'p', Class: 'my-1', Content: $Rule->NotValidMessage);
                 $Valid = false;
             }
         }

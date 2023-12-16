@@ -27,6 +27,7 @@ enum DbType: string
     case Int = 'INT';
     case Integer = 'INTEGER';
     case BigInt = 'BIGINT';
+    case UnsignedInt = 'INT UNSIGNED';
     case Float = 'FLOAT';
     case Double = 'DOUBLE';
     case DoublePrecision = 'DOUBLE PRECISION';

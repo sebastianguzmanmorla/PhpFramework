@@ -13,7 +13,7 @@ use PhpFramework\Html\Enums\InputType;
 use PhpFramework\Url;
 use ReflectionClass;
 
-class Html implements JsonSerializable
+class Markup implements JsonSerializable
 {
     public ?DOMDocument $DOMDocument = null;
 
@@ -21,68 +21,83 @@ class Html implements JsonSerializable
         //Framework attributes
         public string $Dom = 'div',
         public ?string $Icon = null,
-        public Html|Closure|array|string|null $Content = null,
+        public Markup|Closure|array|string|null $Content = null,
 
         //HTML attributes
-        #[HtmlAttribute('id')]
+        #[MarkupAttribute('id')]
         public ?string $Id = null,
-        #[HtmlAttribute('name')]
+        #[MarkupAttribute('name')]
         public ?string $Name = null,
-        #[HtmlAttribute('for')]
+        #[MarkupAttribute('for')]
         public ?string $For = null,
-        #[HtmlAttribute('type')]
+        #[MarkupAttribute('type')]
         public ButtonType|InputType|null $Type = null,
-        #[HtmlAttribute('value')]
+        #[MarkupAttribute('value')]
         public mixed $Value = null,
-        #[HtmlAttribute('max')]
+        #[MarkupAttribute('max')]
         public mixed $Max = null,
-        #[HtmlAttribute('maxlength')]
+        #[MarkupAttribute('maxlength')]
         public mixed $MaxLength = null,
-        #[HtmlAttribute('placeholder')]
+        #[MarkupAttribute('placeholder')]
         public ?string $PlaceHolder = null,
-        #[HtmlAttribute('disabled')]
+        #[MarkupAttribute('disabled')]
         public Closure|bool|null $Disabled = null,
-        #[HtmlAttribute('readonly')]
+        #[MarkupAttribute('readonly')]
         public Closure|bool|null $ReadOnly = null,
-        #[HtmlAttribute('selected')]
+        #[MarkupAttribute('selected')]
         public ?bool $Selected = null,
-        #[HtmlAttribute('class')]
+        #[MarkupAttribute('class')]
         public Closure|string|null $Class = null,
-        #[HtmlAttribute('style')]
+        #[MarkupAttribute('style')]
         public ?string $Style = null,
-        #[HtmlAttribute('title')]
+        #[MarkupAttribute('title')]
         public ?string $Title = null,
-        #[HtmlAttribute('href')]
+        #[MarkupAttribute('href')]
         public Url|Closure|string|null $Href = null,
-        #[HtmlAttribute('target')]
+        #[MarkupAttribute('target')]
         public Url|Closure|string|null $Target = null,
-        #[HtmlAttribute('src')]
+        #[MarkupAttribute('src')]
         public Url|Closure|string|null $Src = null,
-        #[HtmlAttribute('rel')]
+        #[MarkupAttribute('rel')]
         public ?string $Rel = null,
-        #[HtmlAttribute('onclick')]
+        #[MarkupAttribute('onclick')]
         public Closure|string|null $OnClick = null,
 
         //Bootstrap attributes
-        #[HtmlAttribute('role')]
+        #[MarkupAttribute('role')]
         public ?string $Role = null,
-        #[HtmlAttribute('data-bs-dismiss')]
+        #[MarkupAttribute('data-bs-dismiss')]
         public ?string $DataBsDismiss = null,
-        #[HtmlAttribute('data-bs-toggle')]
+        #[MarkupAttribute('data-bs-toggle')]
         public ?string $DataBsToggle = null,
-        #[HtmlAttribute('data-bs-target')]
+        #[MarkupAttribute('data-bs-target')]
         public ?string $DataBsTarget = null,
-        #[HtmlAttribute('data-bs-placement')]
+        #[MarkupAttribute('data-bs-placement')]
         public ?string $DataBsPlacement = null,
-        #[HtmlAttribute('aria-current')]
+        #[MarkupAttribute('aria-current')]
         public ?string $AriaCurrent = null,
-        #[HtmlAttribute('aria-expanded')]
+        #[MarkupAttribute('aria-expanded')]
         public ?string $AriaExpanded = null,
-        #[HtmlAttribute('aria-described-by')]
+        #[MarkupAttribute('aria-described-by')]
         public ?string $AriaDescribedBy = null,
-        #[HtmlAttribute('aria-label')]
+        #[MarkupAttribute('aria-label')]
         public ?string $AriaLabel = null
     ) {
+    }
+
+    public function __toString()
+    {
+        if ($this->DOMDocument === null) {
+            $this->DOMDocument = new DOMDocument();
+        }
+
+        $Element = $this->Generate();
+
+        $Fragment = $this->DOMDocument->createDocumentFragment();
+
+        $Fragment->appendChild($Element);
+
+        return $this->DOMDocument->saveHTML($Fragment);
     }
 
     public function Generate(): DOMElement
@@ -130,13 +145,13 @@ class Html implements JsonSerializable
         $Reflection = new ReflectionClass($this);
 
         foreach ($Reflection->getProperties() as $Property) {
-            $HtmlAttribute = $Property->getAttributes(HtmlAttribute::class);
-            $HtmlAttribute = !empty($HtmlAttribute) ? $HtmlAttribute[0]->newInstance() : null;
+            $MarkupAttribute = $Property->getAttributes(MarkupAttribute::class);
+            $MarkupAttribute = !empty($MarkupAttribute) ? $MarkupAttribute[0]->newInstance() : null;
 
-            if ($HtmlAttribute !== null) {
+            if ($MarkupAttribute !== null) {
                 $Value = $Property->getValue($this);
 
-                if ($Value instanceof Closure && $HtmlAttribute->name === 'href') {
+                if ($Value instanceof Closure && $MarkupAttribute->name === 'href') {
                     $Value = new Url($Value);
                 }
 
@@ -157,27 +172,12 @@ class Html implements JsonSerializable
                 }
 
                 if ($Value !== null && $Value !== false) {
-                    $DOMElement->setAttribute($HtmlAttribute->name, $Value);
+                    $DOMElement->setAttribute($MarkupAttribute->name, $Value);
                 }
             }
         }
 
         return $DOMElement;
-    }
-
-    public function __toString()
-    {
-        if ($this->DOMDocument === null) {
-            $this->DOMDocument = new DOMDocument();
-        }
-
-        $Element = $this->Generate();
-
-        $Fragment = $this->DOMDocument->createDocumentFragment();
-
-        $Fragment->appendChild($Element);
-
-        return $this->DOMDocument->saveHTML($Fragment);
     }
 
     public function jsonSerialize(): mixed

@@ -2,10 +2,9 @@
 
 namespace PhpFramework\Html\Components;
 
-use PhpFramework\Html\Html;
-use PhpFramework\Html\HtmlAttribute;
+use PhpFramework\Html\Markup;
 
-class Script extends Html
+class Script extends Markup
 {
     public function __construct(
         string $Src,

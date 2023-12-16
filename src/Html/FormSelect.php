@@ -58,7 +58,7 @@ class FormSelect extends FormInput
                 $Value->Selected = true;
             }
 
-            $this->Content[] = $Value instanceof Html ? $Value : new Html(
+            $this->Content[] = $Value instanceof Markup ? $Value : new Markup(
                 Dom: 'option',
                 Value: $Value->Value,
                 Content: $Value->Text,

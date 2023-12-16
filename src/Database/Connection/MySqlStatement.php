@@ -11,26 +11,6 @@ class MySqlStatement implements IStatement
 {
     private mysqli_stmt $Statement;
 
-    private function bindTypes($params)
-    {
-        $types = [];
-        foreach ($params as $param) {
-            if (is_string($param)) {
-                $types[] = 's';
-            } else {
-                if (is_float($param)) {
-                    $types[] = 'd';
-                } elseif (is_int($param)) {
-                    $types[] = 'i';
-                } else {
-                    $types[] = 's';
-                }
-            }
-        }
-
-        return implode('', $types);
-    }
-
     public function __construct(IConnection &$Connection, DbQuery $Query, ?Field $Field = null)
     {
         if ($Query->Limit !== null && $Query->Offset === null) {
@@ -83,5 +63,25 @@ class MySqlStatement implements IStatement
     public function Close(): void
     {
         $this->Statement->close();
+    }
+
+    private function bindTypes($params)
+    {
+        $types = [];
+        foreach ($params as $param) {
+            if (is_string($param)) {
+                $types[] = 's';
+            } else {
+                if (is_float($param)) {
+                    $types[] = 'd';
+                } elseif (is_int($param)) {
+                    $types[] = 'i';
+                } else {
+                    $types[] = 's';
+                }
+            }
+        }
+
+        return implode('', $types);
     }
 }

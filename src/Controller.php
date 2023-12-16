@@ -2,11 +2,31 @@
 
 namespace PhpFramework;
 
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use ReflectionClass;
 use ReflectionMethod;
 
 class Controller
 {
+    public static function AutoLoad(string $ControllerFolder): void
+    {
+        $Files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($ControllerFolder, RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+        foreach ($Files as $File) {
+            if ($File->getExtension() == 'php') {
+                require_once $File->getPathname();
+                $Classes = get_declared_classes();
+                $Class = end($Classes);
+                $ControllerClass = new ReflectionClass($Class);
+                if ($ControllerClass->isSubclassOf(static::class)) {
+                    $ControllerClass->getMethod('Register')->invoke(null);
+                }
+            }
+        }
+    }
+
     public static function Register(): void
     {
         $reflectionController = new ReflectionClass(static::class);

@@ -5,7 +5,7 @@ namespace PhpFramework\Html;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-class HtmlAttribute
+class MarkupAttribute
 {
     public function __construct(
         public string $name

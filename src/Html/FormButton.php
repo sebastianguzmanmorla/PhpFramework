@@ -5,7 +5,7 @@ namespace PhpFramework\Html;
 use PhpFramework\Html\Enums\ButtonType;
 use PhpFramework\Html\Enums\Color;
 
-class FormButton extends Html
+class FormButton extends Markup
 {
     public function __construct(
         ?string $Id = null,
@@ -28,7 +28,7 @@ class FormButton extends Html
             Style: $Style,
             Icon: $Icon,
             Title: $Title,
-            Content: $Label !== null ? new Html(Dom: 'Span', Content: $Label) : null,
+            Content: $Label !== null ? new Markup(Dom: 'Span', Content: $Label) : null,
             OnClick: $OnClick
         );
     }

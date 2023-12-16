@@ -6,7 +6,7 @@ use Closure;
 use PhpFramework\Html\Enums\Color;
 use PhpFramework\Url;
 
-class FormLink extends Html
+class FormLink extends Markup
 {
     public function __construct(
         Url|Closure|string|null $Href = null,
@@ -18,7 +18,7 @@ class FormLink extends Html
         ?string $Icon = null,
         ?string $Title = null,
         ?string $Label = null,
-        Html|array|string|null $Content = null,
+        Markup|array|string|null $Content = null,
         Closure|string|null $OnClick = null,
         ?string $Role = null,
         ?string $DataBsDismiss = null,
@@ -38,7 +38,7 @@ class FormLink extends Html
             Style: $Style,
             Icon: $Icon,
             Title: $Title,
-            Content: $Label !== null ? new Html(Dom: 'span', Content: $Label) : null ?? $Content,
+            Content: $Label !== null ? new Markup(Dom: 'span', Content: $Label) : null ?? $Content,
             OnClick: $OnClick,
             Role: $Role,
             DataBsDismiss: $DataBsDismiss,

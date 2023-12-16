@@ -6,11 +6,6 @@ class Alerts
 {
     private array $Alerts = [];
 
-    public function AddAlert(Alert ...$Alert): void
-    {
-        array_push($this->Alerts, ...$Alert);
-    }
-
     public function __toString(): string
     {
         $Result = '';
@@ -19,5 +14,10 @@ class Alerts
         }
 
         return $Result;
+    }
+
+    public function AddAlert(Alert ...$Alert): void
+    {
+        array_push($this->Alerts, ...$Alert);
     }
 }

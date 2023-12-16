@@ -18,8 +18,6 @@ class DbSchema
 
     public $locked = false;
 
-    private bool $Connected = false;
-
     public ?Schema $Schema = null;
 
     /**
@@ -27,20 +25,7 @@ class DbSchema
      */
     public array $Tables = [];
 
-    public function Connection(): IConnection
-    {
-        if ($this->Connected == false) {
-            try {
-                $this->Connected = $this->Connection->Connect();
-            } catch (Throwable $e) {
-                $this->Connected = false;
-
-                throw new Exception('Database connection failed: ' . $e->getMessage());
-            }
-        }
-
-        return $this->Connection;
-    }
+    private bool $Connected = false;
 
     public function __construct(
         IConnection $Connection
@@ -73,6 +58,21 @@ class DbSchema
         }
     }
 
+    public function Connection(): IConnection
+    {
+        if ($this->Connected == false) {
+            try {
+                $this->Connected = $this->Connection->Connect();
+            } catch (Throwable $e) {
+                $this->Connected = false;
+
+                throw new Exception('Database connection failed: ' . $e->getMessage());
+            }
+        }
+
+        return $this->Connection;
+    }
+
     public function Execute(DbQuery $Query)
     {
         $this->Query = $Query;
@@ -84,7 +84,7 @@ class DbSchema
         if ($Bind = $this->Connection()->Prepare($this->Query)) {
             if ($Bind->Execute()) {
                 $Data = $Bind->Result(true);
-                if ($Data !== null) {
+                if ($Data !== null && $Data !== false) {
                     $Result = [];
 
                     foreach ($Data as $Row) {

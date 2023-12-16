@@ -3,9 +3,9 @@
 namespace PhpFramework\Html\Components;
 
 use PhpFramework\Html\Enums\AlertType;
-use PhpFramework\Html\Html;
+use PhpFramework\Html\Markup;
 
-class Alert extends Html
+class Alert extends Markup
 {
     public function __construct(
         public AlertType $AlertType,

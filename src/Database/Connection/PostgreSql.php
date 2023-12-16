@@ -15,13 +15,22 @@ class PostgreSql implements IConnection
         #[SensitiveParameter]
         public ?string $Hostname,
         #[SensitiveParameter]
+        public ?int $Port,
+        #[SensitiveParameter]
         public ?string $Database,
         #[SensitiveParameter]
         public ?string $Username,
         #[SensitiveParameter]
         public ?string $Password
     ) {
-        $this->Client = pg_connect("host={$this->Hostname} dbname={$this->Database} user={$this->Username} password={$this->Password}");
+        $this->Client = pg_connect(
+            (null === $this->Hostname ? '' : "host={$this->Hostname} ")
+            . (null === $this->Port ? '' : "port={$this->Port} ")
+            . (null === $this->Database ? '' : "dbname={$this->Database} ")
+            . (null === $this->Username ? '' : "user={$this->Username} ")
+            . (null === $this->Password ? '' : "password={$this->Password} ")
+        );
+
         pg_set_client_encoding($this->Client, 'utf8');
     }
 

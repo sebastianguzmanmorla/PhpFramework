@@ -14,11 +14,6 @@ class Singleton
         static::$vars[get_class($Singleton)] = &$Singleton;
     }
 
-    private static function isset(string $Type): bool
-    {
-        return isset(static::$vars[$Type]);
-    }
-
     public static function &Get(string $Type): ?object
     {
         $var = null;
@@ -27,5 +22,10 @@ class Singleton
         }
 
         return $var;
+    }
+
+    private static function isset(string $Type): bool
+    {
+        return isset(static::$vars[$Type]);
     }
 }

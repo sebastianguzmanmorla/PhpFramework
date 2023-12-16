@@ -15,6 +15,8 @@ class MySql implements IConnection
         #[SensitiveParameter]
         public ?string $Hostname,
         #[SensitiveParameter]
+        public ?int $Port,
+        #[SensitiveParameter]
         public ?string $Database,
         #[SensitiveParameter]
         public ?string $Username,
@@ -27,7 +29,13 @@ class MySql implements IConnection
 
     public function Connect(): bool
     {
-        return $this->Client->real_connect($this->Hostname, $this->Username, $this->Password, $this->Database);
+        return $this->Client->real_connect(
+            hostname: $this->Hostname,
+            username: $this->Username,
+            password: $this->Password,
+            database: $this->Database,
+            port: $this->Port
+        );
     }
 
     public function Prepare(DbQuery &$Query, ?Field $Field = null): IStatement

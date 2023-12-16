@@ -5,7 +5,7 @@ namespace PhpFramework\Layout\Bootstrap;
 use PhpFramework\Html\Components\Script as ComponentsScript;
 use PhpFramework\Html\Components\Stylesheet;
 use PhpFramework\Html\FormModal;
-use PhpFramework\Html\Html;
+use PhpFramework\Html\Markup;
 use PhpFramework\Layout\Layout;
 use PhpFramework\Layout\Section\Brand;
 use PhpFramework\Layout\Section\Filters;
@@ -75,7 +75,7 @@ class Admin extends Layout
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?= new Html(Dom: 'title', Content: $Context->Title) ?>
+<?= new Markup(Dom: 'title', Content: $Context->Title) ?>
 <?= $Context->Stylesheets ?>
 <style>
 aside
@@ -156,7 +156,7 @@ aside .nav-link[data-bs-toggle="collapse"]:not(.active):focus::after, aside .nav
         <?= $Context->Form?->Open() ?>
 		<div class="shadow sticky-top d-flex justify-content-between flex-wrap align-items-center text-success bg-secondary-subtle py-2 px-3 border-bottom border-success" style="top:54px;">
             <h5 class="card-title my-2">
-                <?= new Html(
+                <?= new Markup(
             Dom: 'span',
             Content: $Context->Title,
             Icon: $Context->Icon

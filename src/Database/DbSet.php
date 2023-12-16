@@ -24,17 +24,6 @@ class DbSet
 
     public Table $Table;
 
-    public function __construct(DbSchema &$DbSchema, Table &$Table)
-    {
-        $this->DbSchema = $DbSchema;
-        $this->Table = $Table;
-    }
-
-    public function Table(string $Name): ?Table
-    {
-        return $this->DbSchema->Tables[$Name] ?? null;
-    }
-
     /**
      * @var array<DbQuery>
      */
@@ -60,467 +49,15 @@ class DbSet
      */
     protected array $Where = [];
 
-    private function CaptureProcess(DbValue &$CaptureVar, &$Reflection, &$UsedVariables): void
+    public function __construct(DbSchema &$DbSchema, Table &$Table)
     {
-        if ($CaptureVar->Variable == null) {
-            return;
-        }
-
-        if ($CaptureVar->Variable == '$this') {
-            $CaptureVar->Value = $Reflection->getClosureThis();
-            if ($CaptureVar->Expression !== null) {
-                foreach ($CaptureVar->Expression as $Expression) {
-                    $CaptureVar->Value = $CaptureVar->Value->{$Expression};
-                }
-            }
-        } elseif (isset($UsedVariables[$CaptureVar->Variable])) {
-            $CaptureVar->Value = $UsedVariables[$CaptureVar->Variable];
-            if ($CaptureVar->Expression !== null) {
-                foreach ($CaptureVar->Expression as $Expression) {
-                    $CaptureVar->Value = $CaptureVar->Value->{$Expression};
-                }
-            }
-        } elseif (in_array($CaptureVar->Variable, ['$_SESSION', '$_GET', '$_POST', '$_COOKIE', '$_SERVER', '$_ENV'])) {
-            switch ($CaptureVar->Variable) {
-                case '$_SESSION':
-                    $CaptureVar->Value = $_SESSION;
-
-                    break;
-                case '$_GET':
-                    $CaptureVar->Value = $_GET;
-
-                    break;
-                case '$_POST':
-                    $CaptureVar->Value = $_POST;
-
-                    break;
-                case '$_COOKIE':
-                    $CaptureVar->Value = $_COOKIE;
-
-                    break;
-                case '$_SERVER':
-                    $CaptureVar->Value = $_SERVER;
-
-                    break;
-                case '$_ENV':
-                    $CaptureVar->Value = $_ENV;
-
-                    break;
-            }
-            if ($CaptureVar->Expression !== null) {
-                foreach ($CaptureVar->Expression as $Expression) {
-                    $Expression = trim($Expression, "\"'");
-                    $CaptureVar->Value = $CaptureVar->Value[$Expression] ?? null;
-                }
-            }
-        }
+        $this->DbSchema = $DbSchema;
+        $this->Table = $Table;
     }
 
-    private function SelectGenerator(Closure $Select): Generator
+    public function Table(string $Name): ?Table
     {
-        $Reflection = new ReflectionFunction($Select);
-
-        $Parameters = [];
-
-        foreach ($Reflection->getParameters() as $Parameter) {
-            $ParameterType = $Parameter->getType();
-            if ($ParameterType !== null) {
-                $ParameterClass = new ReflectionClass($ParameterType->getName());
-                if (!$ParameterClass->isSubclassOf(DbTable::class)) {
-                    throw new Exception('El parametro no es de la clase requerida.', false);
-                }
-                $Parameters['$' . $Parameter->getName()] = $this->Table($ParameterType->getName());
-            }
-        }
-
-        $Tokens = SourceReader::readClosure($Reflection, 0);
-        $Tokens = new ArrayObject($Tokens);
-        $Tokens = $Tokens->getIterator();
-
-        $Token = fn () => $Tokens->current();
-
-        while ($Tokens->valid()) {
-            if (in_array($Token()->id, [T_VARIABLE, T_STRING]) && isset($Parameters[$Token()->text])) {
-                $Instance = $Parameters[$Token()->text];
-
-                $Tokens->next();
-
-                if (in_array($Token()->id, [T_OBJECT_OPERATOR])) {
-                    $Tokens->next();
-                    yield $Instance->Field($Token()->text);
-                } else {
-                    $All = new Field(Field: '*');
-                    $All->Table = &$Instance;
-                    yield $All;
-                }
-            }
-            $Tokens->next();
-        }
-    }
-
-    private function ProcessDbOrder(&$Tokens, &$Token, &$Parameters)
-    {
-        $DbOrder = new ReflectionClass(DbOrder::class);
-
-        $Tokens->next();
-
-        if ($Token()->id != T_DOUBLE_COLON) {
-            throw new Exception('Error de sintaxis');
-        }
-
-        $Tokens->next();
-
-        $DbOrderMethod = $DbOrder->getMethod($Token()->text);
-
-        $Tokens->next();
-
-        if ($Token()->text != '(') {
-            throw new Exception('Error de sintaxis');
-        }
-
-        $Tokens->next();
-
-        $Field = null;
-
-        $Instance = $Parameters[$Token()->text];
-
-        $Tokens->next();
-
-        if (in_array($Token()->id, [T_OBJECT_OPERATOR])) {
-            $Tokens->next();
-            $Field = $Instance->Field($Token()->text);
-        } else {
-            throw new Exception('Error de sintaxis');
-        }
-
-        $Tokens->next();
-
-        if ($Token()->text != ')') {
-            throw new Exception('Error de sintaxis');
-        }
-
-        $Tokens->next();
-
-        return $DbOrderMethod->invoke(null, $Field);
-    }
-
-    private function ProcessDbWhere(&$Tokens, &$Token, &$Parameters, &$UsedVariables, &$Reflection)
-    {
-        $DbWhere = new ReflectionClass(DbWhere::class);
-
-        $Tokens->next();
-
-        if ($Token()->id != T_DOUBLE_COLON) {
-            throw new Exception('Error de sintaxis 1');
-        }
-
-        $Tokens->next();
-
-        $DbWhereMethod = $DbWhere->getMethod($Token()->text);
-
-        $Tokens->next();
-
-        if ($Token()->text != '(') {
-            throw new Exception('Error de sintaxis 2');
-        }
-
-        $Tokens->next();
-
-        $DbWhereMethodParameters = [];
-
-        foreach ($DbWhereMethod->getParameters() as $Parameter) {
-            while ($Tokens->valid() && in_array($Token()->id, [T_WHITESPACE, 44])) {
-                $Tokens->next();
-            }
-
-            if ($Parameter->getType()->getName() == Field::class) {
-                if (!isset($Parameters[$Token()->text])) {
-                    throw new Exception('Error de sintaxis 3');
-                }
-
-                $Field = null;
-
-                $Instance = $Parameters[$Token()->text];
-
-                $Tokens->next();
-
-                if (in_array($Token()->id, [T_OBJECT_OPERATOR])) {
-                    $Tokens->next();
-                    $Field = $Instance->Field($Token()->text);
-                } else {
-                    throw new Exception('Error de sintaxis 4');
-                }
-
-                $Tokens->next();
-
-                $DbWhereMethodParameters[] = $Field;
-
-                continue;
-            }
-
-            if (in_array($Token()->id, [T_LNUMBER, T_DNUMBER, T_CONSTANT_ENCAPSED_STRING])) {
-                $DbWhereMethodParameters[] = $Token()->id == T_CONSTANT_ENCAPSED_STRING ? trim($Token()->text, "'\"") : $Token()->text;
-
-                $Tokens->next();
-
-                continue;
-            }
-
-            if (in_array($Token()->id, [T_VARIABLE])) {
-                $Variable = $Token()->text;
-
-                $Expression = [];
-
-                $Tokens->next();
-
-                while (in_array($Token()->id, [T_OBJECT_OPERATOR, 91])) {
-                    $Tokens->next();
-                    $Expression[] = $Token()->text;
-                    $Tokens->next();
-                }
-
-                $Value = null;
-
-                if ($Variable == '$this') {
-                    $Value = $Reflection->getClosureThis();
-                    foreach ($Expression as $Expression) {
-                        $Value = $Value->{$Expression};
-                    }
-                } elseif (isset($UsedVariables[$Variable])) {
-                    $Value = $UsedVariables[$Variable];
-                    foreach ($Expression as $Expression) {
-                        $Value = $Value->{$Expression};
-                    }
-                } elseif (in_array($Variable, ['$_SESSION', '$_GET', '$_POST', '$_COOKIE', '$_SERVER', '$_ENV'])) {
-                    switch ($Variable) {
-                        case '$_SESSION':
-                            $Value = $_SESSION;
-
-                            break;
-                        case '$_GET':
-                            $Value = $_GET;
-
-                            break;
-                        case '$_POST':
-                            $Value = $_POST;
-
-                            break;
-                        case '$_COOKIE':
-                            $Value = $_COOKIE;
-
-                            break;
-                        case '$_SERVER':
-                            $Value = $_SERVER;
-
-                            break;
-                        case '$_ENV':
-                            $Value = $_ENV;
-
-                            break;
-                    }
-                    foreach ($Expression as $Expression) {
-                        $Expression = trim($Expression, "\"'");
-                        $Value = $Value[$Expression] ?? null;
-                    }
-                }
-
-                $DbWhereMethodParameters[] = $Value;
-
-                continue;
-            }
-        }
-
-        if ($Token()->text != ')') {
-            throw new Exception('Error de sintaxis 5');
-        }
-
-        $Tokens->next();
-
-        if (count($DbWhereMethod->getParameters()) == count($DbWhereMethodParameters)) {
-            return $DbWhereMethod->invokeArgs(null, $DbWhereMethodParameters);
-        }
-
-        throw new Exception('Error de sintaxis 6');
-    }
-
-    private function QueryGenerator(Closure $Function, bool $Logic = true): Generator
-    {
-        $Reflection = new ReflectionFunction($Function);
-
-        $UsedVariables = [];
-        $Parameters = [];
-
-        $Tokens = SourceReader::readClosure($Reflection, 0);
-
-        foreach ($Reflection->getClosureUsedVariables() as $Variable => $Value) {
-            $UsedVariables['$' . $Variable] = $Value;
-        }
-
-        foreach ($Reflection->getParameters() as $Parameter) {
-            $ParameterType = $Parameter->getType();
-            if ($ParameterType !== null) {
-                $ParameterClass = new ReflectionClass($ParameterType->getName());
-                if (!$ParameterClass->isSubclassOf(DbTable::class)) {
-                    throw new Exception('El parametro no es de la clase requerida.', false);
-                }
-                $Parameters['$' . $Parameter->getName()] = $this->Table($ParameterType->getName());
-            }
-        }
-
-        $Tokens = new ArrayObject($Tokens);
-        $Tokens = $Tokens->getIterator();
-
-        $Token = fn () => $Tokens->current();
-
-        while ($Tokens->valid()) {
-            if ($Tokens->valid() && in_array($Token()->id, [61])) {
-                throw new Exception('Error de sintaxis');
-            }
-
-            if ($Tokens->valid() && in_array($Token()->id, [40, 41])) {
-                yield $Token()->text;
-                $Tokens->next();
-
-                continue;
-            }
-
-            if ($Tokens->valid() && in_array($Token()->id, [T_WHITESPACE])) {
-                $Tokens->next();
-
-                continue;
-            }
-
-            if ($Tokens->valid() && in_array($Token()->id, [T_VARIABLE, T_STRING])) {
-                if ($Token()->text == 'DbOrder') {
-                    yield self::ProcessDbOrder($Tokens, $Token, $Parameters);
-
-                    continue;
-                } elseif ($Token()->text == 'DbWhere') {
-                    yield self::ProcessDbWhere($Tokens, $Token, $Parameters, $UsedVariables, $Reflection);
-
-                    continue;
-                } elseif (isset($Parameters[$Token()->text])) {
-                    $Field = new Field();
-                    $Value = null;
-
-                    $Instance = $Parameters[$Token()->text];
-
-                    $Tokens->next();
-
-                    if ($Tokens->valid() && in_array($Token()->id, [T_OBJECT_OPERATOR])) {
-                        $Tokens->next();
-                        $Field = $Instance->Field($Token()->text);
-                        $Tokens->next();
-                    } else {
-                        throw new Exception('Error de sintaxis');
-                    }
-
-                    while ($Tokens->valid() && in_array($Token()->id, [T_WHITESPACE])) {
-                        $Tokens->next();
-                    }
-
-                    if ($Tokens->valid() && DbWhere::FromToken($Token()) !== null) {
-                        $Value = new DbValue(Field: $Field, Where: DbWhere::FromToken($Token()));
-
-                        $Tokens->next();
-                    } else {
-                        yield $Field;
-
-                        continue;
-                    }
-
-                    while ($Tokens->valid() && in_array($Token()->id, [T_WHITESPACE])) {
-                        $Tokens->next();
-                    }
-
-                    if ($Tokens->valid() && in_array($Token()->id, [T_VARIABLE, T_STRING])) {
-                        if (isset($Parameters[$Token()->text])) {
-                            $Instance = $Parameters[$Token()->text];
-
-                            $Tokens->next();
-
-                            if ($Tokens->valid() && in_array($Token()->id, [T_OBJECT_OPERATOR])) {
-                                $Tokens->next();
-                                $Value->Value = $Instance->Field($Token()->text);
-                                $Tokens->next();
-                            } else {
-                                throw new Exception('Error de sintaxis');
-                            }
-                        } else {
-                            $Value->Variable = $Token()->text;
-
-                            $Value->Expression = [];
-
-                            $Tokens->next();
-
-                            while ($Tokens->valid() && in_array($Token()->id, [T_OBJECT_OPERATOR, 91])) {
-                                $Tokens->next();
-                                $Value->Expression[] = $Token()->text;
-                                $Tokens->next();
-                            }
-
-                            if ($Value instanceof DbValue) {
-                                self::CaptureProcess($Value, $Reflection, $UsedVariables);
-                            }
-                        }
-                    }
-
-                    if ($Tokens->valid() && in_array($Token()->id, [T_LNUMBER, T_DNUMBER, T_CONSTANT_ENCAPSED_STRING])) {
-                        $Value->Value = $Token()->id == T_CONSTANT_ENCAPSED_STRING ? trim($Token()->text, "'\"") : $Token()->text;
-                        $Tokens->next();
-                    }
-
-                    yield $Value;
-                } else {
-                    $CaptureVar = new DbValue(Variable: $Token()->text);
-
-                    $CaptureVar->Expression = [];
-
-                    $Tokens->next();
-
-                    while ($Tokens->valid() && in_array($Token()->id, [T_OBJECT_OPERATOR, 91])) {
-                        $Tokens->next();
-                        $CaptureVar->Expression[] = $Token()->text;
-                        $Tokens->next();
-                    }
-
-                    if ($CaptureVar instanceof DbValue) {
-                        self::CaptureProcess($CaptureVar, $Reflection, $UsedVariables);
-                    }
-
-                    yield $CaptureVar;
-                }
-
-                continue;
-            }
-
-            if ($Tokens->valid() && in_array($Token()->id, [T_BOOLEAN_AND, T_LOGICAL_AND, T_BOOLEAN_OR, T_LOGICAL_OR])) {
-                if ($Logic) {
-                    yield ' ' . DbLogic::FromToken($Token())?->value . ' ';
-                }
-
-                $Tokens->next();
-
-                continue;
-            }
-
-            $Tokens->next();
-        }
-    }
-
-    private function GenerateInstance(): static
-    {
-        $Instance = new static($this->DbSchema, $this->Table);
-
-        $Instance->DbSchema = $this->DbSchema;
-        $Instance->Table = clone $this->Table;
-        $Instance->InnerJoin = $this->InnerJoin;
-        $Instance->LeftJoin = $this->LeftJoin;
-        $Instance->GroupBy = $this->GroupBy;
-        $Instance->OrderBy = $this->OrderBy;
-        $Instance->Where = $this->Where;
-
-        return $Instance;
+        return $this->DbSchema->Tables[$Name] ?? null;
     }
 
     public function InnerJoin(Closure $InnerJoin): static
@@ -1248,5 +785,468 @@ class DbSet
     public function Update(DbTable $value, $old_select = true)
     {
         return $this->UpdateExecute($value, $old_select);
+    }
+
+    private function CaptureProcess(DbValue &$CaptureVar, &$Reflection, &$UsedVariables): void
+    {
+        if ($CaptureVar->Variable == null) {
+            return;
+        }
+
+        if ($CaptureVar->Variable == '$this') {
+            $CaptureVar->Value = $Reflection->getClosureThis();
+            if ($CaptureVar->Expression !== null) {
+                foreach ($CaptureVar->Expression as $Expression) {
+                    $CaptureVar->Value = $CaptureVar->Value->{$Expression};
+                }
+            }
+        } elseif (isset($UsedVariables[$CaptureVar->Variable])) {
+            $CaptureVar->Value = $UsedVariables[$CaptureVar->Variable];
+            if ($CaptureVar->Expression !== null) {
+                foreach ($CaptureVar->Expression as $Expression) {
+                    $CaptureVar->Value = $CaptureVar->Value->{$Expression};
+                }
+            }
+        } elseif (in_array($CaptureVar->Variable, ['$_SESSION', '$_GET', '$_POST', '$_COOKIE', '$_SERVER', '$_ENV'])) {
+            switch ($CaptureVar->Variable) {
+                case '$_SESSION':
+                    $CaptureVar->Value = $_SESSION;
+
+                    break;
+                case '$_GET':
+                    $CaptureVar->Value = $_GET;
+
+                    break;
+                case '$_POST':
+                    $CaptureVar->Value = $_POST;
+
+                    break;
+                case '$_COOKIE':
+                    $CaptureVar->Value = $_COOKIE;
+
+                    break;
+                case '$_SERVER':
+                    $CaptureVar->Value = $_SERVER;
+
+                    break;
+                case '$_ENV':
+                    $CaptureVar->Value = $_ENV;
+
+                    break;
+            }
+            if ($CaptureVar->Expression !== null) {
+                foreach ($CaptureVar->Expression as $Expression) {
+                    $Expression = trim($Expression, "\"'");
+                    $CaptureVar->Value = $CaptureVar->Value[$Expression] ?? null;
+                }
+            }
+        }
+    }
+
+    private function SelectGenerator(Closure $Select): Generator
+    {
+        $Reflection = new ReflectionFunction($Select);
+
+        $Parameters = [];
+
+        foreach ($Reflection->getParameters() as $Parameter) {
+            $ParameterType = $Parameter->getType();
+            if ($ParameterType !== null) {
+                $ParameterClass = new ReflectionClass($ParameterType->getName());
+                if (!$ParameterClass->isSubclassOf(DbTable::class)) {
+                    throw new Exception('El parametro no es de la clase requerida.', false);
+                }
+                $Parameters['$' . $Parameter->getName()] = $this->Table($ParameterType->getName());
+            }
+        }
+
+        $Tokens = SourceReader::readClosure($Reflection, 0);
+        $Tokens = new ArrayObject($Tokens);
+        $Tokens = $Tokens->getIterator();
+
+        $Token = fn () => $Tokens->current();
+
+        while ($Tokens->valid()) {
+            if (in_array($Token()->id, [T_VARIABLE, T_STRING]) && isset($Parameters[$Token()->text])) {
+                $Instance = $Parameters[$Token()->text];
+
+                $Tokens->next();
+
+                if (in_array($Token()->id, [T_OBJECT_OPERATOR])) {
+                    $Tokens->next();
+                    yield $Instance->Field($Token()->text);
+                } else {
+                    $All = new Field(Field: '*');
+                    $All->Table = &$Instance;
+                    yield $All;
+                }
+            }
+            $Tokens->next();
+        }
+    }
+
+    private function ProcessDbOrder(&$Tokens, &$Token, &$Parameters)
+    {
+        $DbOrder = new ReflectionClass(DbOrder::class);
+
+        $Tokens->next();
+
+        if ($Token()->id != T_DOUBLE_COLON) {
+            throw new Exception('Error de sintaxis');
+        }
+
+        $Tokens->next();
+
+        $DbOrderMethod = $DbOrder->getMethod($Token()->text);
+
+        $Tokens->next();
+
+        if ($Token()->text != '(') {
+            throw new Exception('Error de sintaxis');
+        }
+
+        $Tokens->next();
+
+        $Field = null;
+
+        $Instance = $Parameters[$Token()->text];
+
+        $Tokens->next();
+
+        if (in_array($Token()->id, [T_OBJECT_OPERATOR])) {
+            $Tokens->next();
+            $Field = $Instance->Field($Token()->text);
+        } else {
+            throw new Exception('Error de sintaxis');
+        }
+
+        $Tokens->next();
+
+        if ($Token()->text != ')') {
+            throw new Exception('Error de sintaxis');
+        }
+
+        $Tokens->next();
+
+        return $DbOrderMethod->invoke(null, $Field);
+    }
+
+    private function ProcessDbWhere(&$Tokens, &$Token, &$Parameters, &$UsedVariables, &$Reflection)
+    {
+        $DbWhere = new ReflectionClass(DbWhere::class);
+
+        $Tokens->next();
+
+        if ($Token()->id != T_DOUBLE_COLON) {
+            throw new Exception('Error de sintaxis 1');
+        }
+
+        $Tokens->next();
+
+        $DbWhereMethod = $DbWhere->getMethod($Token()->text);
+
+        $Tokens->next();
+
+        if ($Token()->text != '(') {
+            throw new Exception('Error de sintaxis 2');
+        }
+
+        $Tokens->next();
+
+        $DbWhereMethodParameters = [];
+
+        foreach ($DbWhereMethod->getParameters() as $Parameter) {
+            while ($Tokens->valid() && in_array($Token()->id, [T_WHITESPACE, 44])) {
+                $Tokens->next();
+            }
+
+            if ($Parameter->getType()->getName() == Field::class) {
+                if (!isset($Parameters[$Token()->text])) {
+                    throw new Exception('Error de sintaxis 3');
+                }
+
+                $Field = null;
+
+                $Instance = $Parameters[$Token()->text];
+
+                $Tokens->next();
+
+                if (in_array($Token()->id, [T_OBJECT_OPERATOR])) {
+                    $Tokens->next();
+                    $Field = $Instance->Field($Token()->text);
+                } else {
+                    throw new Exception('Error de sintaxis 4');
+                }
+
+                $Tokens->next();
+
+                $DbWhereMethodParameters[] = $Field;
+
+                continue;
+            }
+
+            if (in_array($Token()->id, [T_LNUMBER, T_DNUMBER, T_CONSTANT_ENCAPSED_STRING])) {
+                $DbWhereMethodParameters[] = $Token()->id == T_CONSTANT_ENCAPSED_STRING ? trim($Token()->text, "'\"") : $Token()->text;
+
+                $Tokens->next();
+
+                continue;
+            }
+
+            if (in_array($Token()->id, [T_VARIABLE])) {
+                $Variable = $Token()->text;
+
+                $Expression = [];
+
+                $Tokens->next();
+
+                while (in_array($Token()->id, [T_OBJECT_OPERATOR, 91])) {
+                    $Tokens->next();
+                    $Expression[] = $Token()->text;
+                    $Tokens->next();
+                }
+
+                $Value = null;
+
+                if ($Variable == '$this') {
+                    $Value = $Reflection->getClosureThis();
+                    foreach ($Expression as $Expression) {
+                        $Value = $Value->{$Expression};
+                    }
+                } elseif (isset($UsedVariables[$Variable])) {
+                    $Value = $UsedVariables[$Variable];
+                    foreach ($Expression as $Expression) {
+                        $Value = $Value->{$Expression};
+                    }
+                } elseif (in_array($Variable, ['$_SESSION', '$_GET', '$_POST', '$_COOKIE', '$_SERVER', '$_ENV'])) {
+                    switch ($Variable) {
+                        case '$_SESSION':
+                            $Value = $_SESSION;
+
+                            break;
+                        case '$_GET':
+                            $Value = $_GET;
+
+                            break;
+                        case '$_POST':
+                            $Value = $_POST;
+
+                            break;
+                        case '$_COOKIE':
+                            $Value = $_COOKIE;
+
+                            break;
+                        case '$_SERVER':
+                            $Value = $_SERVER;
+
+                            break;
+                        case '$_ENV':
+                            $Value = $_ENV;
+
+                            break;
+                    }
+                    foreach ($Expression as $Expression) {
+                        $Expression = trim($Expression, "\"'");
+                        $Value = $Value[$Expression] ?? null;
+                    }
+                }
+
+                $DbWhereMethodParameters[] = $Value;
+
+                continue;
+            }
+        }
+
+        if ($Token()->text != ')') {
+            throw new Exception('Error de sintaxis 5');
+        }
+
+        $Tokens->next();
+
+        if (count($DbWhereMethod->getParameters()) == count($DbWhereMethodParameters)) {
+            return $DbWhereMethod->invokeArgs(null, $DbWhereMethodParameters);
+        }
+
+        throw new Exception('Error de sintaxis 6');
+    }
+
+    private function QueryGenerator(Closure $Function, bool $Logic = true): Generator
+    {
+        $Reflection = new ReflectionFunction($Function);
+
+        $UsedVariables = [];
+        $Parameters = [];
+
+        $Tokens = SourceReader::readClosure($Reflection, 0);
+
+        foreach ($Reflection->getClosureUsedVariables() as $Variable => $Value) {
+            $UsedVariables['$' . $Variable] = $Value;
+        }
+
+        foreach ($Reflection->getParameters() as $Parameter) {
+            $ParameterType = $Parameter->getType();
+            if ($ParameterType !== null) {
+                $ParameterClass = new ReflectionClass($ParameterType->getName());
+                if (!$ParameterClass->isSubclassOf(DbTable::class)) {
+                    throw new Exception('El parametro no es de la clase requerida.', false);
+                }
+                $Parameters['$' . $Parameter->getName()] = $this->Table($ParameterType->getName());
+            }
+        }
+
+        $Tokens = new ArrayObject($Tokens);
+        $Tokens = $Tokens->getIterator();
+
+        $Token = fn () => $Tokens->current();
+
+        while ($Tokens->valid()) {
+            if ($Tokens->valid() && in_array($Token()->id, [61])) {
+                throw new Exception('Error de sintaxis');
+            }
+
+            if ($Tokens->valid() && in_array($Token()->id, [40, 41])) {
+                yield $Token()->text;
+                $Tokens->next();
+
+                continue;
+            }
+
+            if ($Tokens->valid() && in_array($Token()->id, [T_WHITESPACE])) {
+                $Tokens->next();
+
+                continue;
+            }
+
+            if ($Tokens->valid() && in_array($Token()->id, [T_VARIABLE, T_STRING])) {
+                if ($Token()->text == 'DbOrder') {
+                    yield self::ProcessDbOrder($Tokens, $Token, $Parameters);
+
+                    continue;
+                } elseif ($Token()->text == 'DbWhere') {
+                    yield self::ProcessDbWhere($Tokens, $Token, $Parameters, $UsedVariables, $Reflection);
+
+                    continue;
+                } elseif (isset($Parameters[$Token()->text])) {
+                    $Field = new Field();
+                    $Value = null;
+
+                    $Instance = $Parameters[$Token()->text];
+
+                    $Tokens->next();
+
+                    if ($Tokens->valid() && in_array($Token()->id, [T_OBJECT_OPERATOR])) {
+                        $Tokens->next();
+                        $Field = $Instance->Field($Token()->text);
+                        $Tokens->next();
+                    } else {
+                        throw new Exception('Error de sintaxis');
+                    }
+
+                    while ($Tokens->valid() && in_array($Token()->id, [T_WHITESPACE])) {
+                        $Tokens->next();
+                    }
+
+                    if ($Tokens->valid() && DbWhere::FromToken($Token()) !== null) {
+                        $Value = new DbValue(Field: $Field, Where: DbWhere::FromToken($Token()));
+
+                        $Tokens->next();
+                    } else {
+                        yield $Field;
+
+                        continue;
+                    }
+
+                    while ($Tokens->valid() && in_array($Token()->id, [T_WHITESPACE])) {
+                        $Tokens->next();
+                    }
+
+                    if ($Tokens->valid() && in_array($Token()->id, [T_VARIABLE, T_STRING])) {
+                        if (isset($Parameters[$Token()->text])) {
+                            $Instance = $Parameters[$Token()->text];
+
+                            $Tokens->next();
+
+                            if ($Tokens->valid() && in_array($Token()->id, [T_OBJECT_OPERATOR])) {
+                                $Tokens->next();
+                                $Value->Value = $Instance->Field($Token()->text);
+                                $Tokens->next();
+                            } else {
+                                throw new Exception('Error de sintaxis');
+                            }
+                        } else {
+                            $Value->Variable = $Token()->text;
+
+                            $Value->Expression = [];
+
+                            $Tokens->next();
+
+                            while ($Tokens->valid() && in_array($Token()->id, [T_OBJECT_OPERATOR, 91])) {
+                                $Tokens->next();
+                                $Value->Expression[] = $Token()->text;
+                                $Tokens->next();
+                            }
+
+                            if ($Value instanceof DbValue) {
+                                self::CaptureProcess($Value, $Reflection, $UsedVariables);
+                            }
+                        }
+                    }
+
+                    if ($Tokens->valid() && in_array($Token()->id, [T_LNUMBER, T_DNUMBER, T_CONSTANT_ENCAPSED_STRING])) {
+                        $Value->Value = $Token()->id == T_CONSTANT_ENCAPSED_STRING ? trim($Token()->text, "'\"") : $Token()->text;
+                        $Tokens->next();
+                    }
+
+                    yield $Value;
+                } else {
+                    $CaptureVar = new DbValue(Variable: $Token()->text);
+
+                    $CaptureVar->Expression = [];
+
+                    $Tokens->next();
+
+                    while ($Tokens->valid() && in_array($Token()->id, [T_OBJECT_OPERATOR, 91])) {
+                        $Tokens->next();
+                        $CaptureVar->Expression[] = $Token()->text;
+                        $Tokens->next();
+                    }
+
+                    if ($CaptureVar instanceof DbValue) {
+                        self::CaptureProcess($CaptureVar, $Reflection, $UsedVariables);
+                    }
+
+                    yield $CaptureVar;
+                }
+
+                continue;
+            }
+
+            if ($Tokens->valid() && in_array($Token()->id, [T_BOOLEAN_AND, T_LOGICAL_AND, T_BOOLEAN_OR, T_LOGICAL_OR])) {
+                if ($Logic) {
+                    yield ' ' . DbLogic::FromToken($Token())?->value . ' ';
+                }
+
+                $Tokens->next();
+
+                continue;
+            }
+
+            $Tokens->next();
+        }
+    }
+
+    private function GenerateInstance(): static
+    {
+        $Instance = new static($this->DbSchema, $this->Table);
+
+        $Instance->DbSchema = $this->DbSchema;
+        $Instance->Table = clone $this->Table;
+        $Instance->InnerJoin = $this->InnerJoin;
+        $Instance->LeftJoin = $this->LeftJoin;
+        $Instance->GroupBy = $this->GroupBy;
+        $Instance->OrderBy = $this->OrderBy;
+        $Instance->Where = $this->Where;
+
+        return $Instance;
     }
 }

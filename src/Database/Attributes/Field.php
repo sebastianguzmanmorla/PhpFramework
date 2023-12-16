@@ -27,27 +27,29 @@ class Field
      */
     public array $ValidationRules = [];
 
-    public function GetValue(DbTable $Table): mixed
-    {
-        return $this->Reflection->getValue($Table);
-    }
-
     public function __construct(
-        public ?DbType $Type = null,
-        public ?int $MinLength = null,
-        public ?int $MaxLength = null,
-        public ?int $DecimalLength = null,
+        // Database Attributes
         public ?string $Field = null,
-        public ?string $Label = null,
+        public ?DbType $Type = null,
+        public bool $AllowNull = false,
+        public ?int $FieldLength = null,
+        public ?int $FieldDecimalLength = null,
         public bool $PrimaryKey = false,
         public bool $AutoIncrement = false,
-        public bool $NotNull = false,
+        public mixed $Default = null,
+
+        // Html Attributes
+        public ?string $Label = null,
+
+        // Validation Attributes
+        public ?int $MinLength = null,
+        public ?int $MaxLength = null,
         public bool $IsUnique = false,
         public bool $IsMail = false,
         public bool $IsRut = false,
         public mixed $Filter = null
     ) {
-        if ($this->NotNull) {
+        if (!$this->AllowNull) {
             $this->ValidationRules[] = new IsNotNull(Field: $this);
         }
         if ($this->MinLength || $this->MaxLength) {
@@ -95,5 +97,10 @@ class Field
     public function __toString()
     {
         return ($this->Table !== null ? $this->Table . '.' : '') . $this->Field;
+    }
+
+    public function GetValue(DbTable $Table): mixed
+    {
+        return $this->Reflection->getValue($Table);
     }
 }

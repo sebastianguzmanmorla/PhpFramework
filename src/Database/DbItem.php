@@ -11,11 +11,6 @@ use stdClass;
 
 class DbItem extends stdClass implements ArrayAccess, JsonSerializable
 {
-    public function jsonSerialize(): mixed
-    {
-        return $this;
-    }
-
     public function __isset(string $name): bool
     {
         $Reflection = new ReflectionObject($this);
@@ -44,7 +39,7 @@ class DbItem extends stdClass implements ArrayAccess, JsonSerializable
             }
         }
 
-        return throw new Exception("Property {$name} not found");
+        throw new Exception("Property {$name} not found");
     }
 
     public function __set(string $name, mixed $value): void
@@ -95,6 +90,11 @@ class DbItem extends stdClass implements ArrayAccess, JsonSerializable
                 }
             }
         }
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return $this;
     }
 
     public function offsetExists(mixed $offset): bool

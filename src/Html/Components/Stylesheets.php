@@ -6,11 +6,6 @@ class Stylesheets
 {
     private array $Stylesheets = [];
 
-    public function Add(Stylesheet ...$Stylesheet): void
-    {
-        array_push($this->Stylesheets, ...$Stylesheet);
-    }
-
     public function __toString(): string
     {
         $Result = '';
@@ -19,5 +14,10 @@ class Stylesheets
         }
 
         return $Result;
+    }
+
+    public function Add(Stylesheet ...$Stylesheet): void
+    {
+        array_push($this->Stylesheets, ...$Stylesheet);
     }
 }

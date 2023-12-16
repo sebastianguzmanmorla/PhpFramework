@@ -2,8 +2,8 @@
 
 namespace PhpFramework\Response;
 
-use PhpFramework\Html\Html;
-use PhpFramework\Singleton;
+use PhpFramework\Attributes\Singleton;
+use PhpFramework\Html\Markup;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use ReflectionClass;
 use Throwable;
@@ -33,7 +33,7 @@ class XlsxResponse implements IResponse
             $Attributes = $Property->getAttributes();
             foreach ($Attributes as $Attribute) {
                 $Value = $Attribute->newInstance();
-                if ($Value instanceof Html) {
+                if ($Value instanceof Markup) {
                     $Property->setValue($this, $Value);
                 }
             }

@@ -12,6 +12,8 @@ interface IConnection
         #[SensitiveParameter]
         ?string $Hostname,
         #[SensitiveParameter]
+        ?int $Port,
+        #[SensitiveParameter]
         ?string $Database,
         #[SensitiveParameter]
         ?string $Username,
