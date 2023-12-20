@@ -3,6 +3,7 @@
 namespace PhpFramework\Database\Attributes;
 
 use Attribute;
+use PhpFramework\Database\DbSchema;
 use PhpFramework\Database\DbTable;
 use PhpFramework\Database\DbValue;
 use PhpFramework\Database\Enumerations\DbType;
@@ -18,14 +19,16 @@ use ReflectionProperty;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class Field
 {
-    public ReflectionProperty $Reflection;
-
-    public ?Table $Table;
-
     /**
      * @var array<IValidationRule>
      */
     public array $ValidationRules = [];
+
+    protected DbSchema $Schema;
+
+    protected DbTable $Table;
+
+    protected ReflectionProperty $Reflection;
 
     public function __construct(
         // Database Attributes
@@ -49,6 +52,8 @@ class Field
         public bool $IsRut = false,
         public mixed $Filter = null
     ) {
+        $this->MaxLength ??= $this->FieldLength;
+
         if (!$this->AllowNull) {
             $this->ValidationRules[] = new IsNotNull(Field: $this);
         }
@@ -65,7 +70,7 @@ class Field
             $this->ValidationRules[] = new Validate(
                 NotValidMessage: 'Ya existe un registro con este ' . ($this->Label ?? 'Valor'),
                 Validation: function (mixed $value, ?DbTable $Context = null) {
-                    $Set = $this->Table->DbSet
+                    $Set = $this->Table->DbSet()
                         ->WhereValue(new DbValue(
                             Field: $this,
                             Where: DbWhere::Equal,
@@ -99,8 +104,23 @@ class Field
         return ($this->Table !== null ? $this->Table . '.' : '') . $this->Field;
     }
 
+    public function Initialize(
+        DbSchema &$Schema,
+        DbTable &$Table,
+        ReflectionProperty &$Reflection
+    ): void {
+        $this->Schema = $Schema;
+        $this->Table = $Table;
+        $this->Reflection = $Reflection;
+    }
+
     public function GetValue(DbTable $Table): mixed
     {
         return $this->Reflection->getValue($Table);
+    }
+
+    public function SetValue(DbTable $Table, mixed $Value): void
+    {
+        $this->Reflection->setValue($Table, $Value);
     }
 }

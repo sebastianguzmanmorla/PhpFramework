@@ -2,12 +2,15 @@
 
 namespace PhpFramework\Html;
 
+use Closure;
 use PhpFramework\Html\Enums\Color;
+use PhpFramework\Url;
 
 class FormModalLink extends FormLink
 {
     public function __construct(
         string $Modal,
+        public Url|Closure|string|null $Action = null,
         ?string $Id = null,
         ?string $Class = null,
         ?Color $Color = null,
@@ -17,6 +20,15 @@ class FormModalLink extends FormLink
         ?string $Label = null,
         array $Values = []
     ) {
+        if ($this->Action instanceof Closure) {
+            $this->Action = new Url($this->Action);
+        }
+        if ($this->Action instanceof Url) {
+            $this->Action = $this->Action->Url;
+        }
+
+        $Values['action'] = $this->Action;
+
         parent::__construct(
             Href: '#',
             Id: $Id,

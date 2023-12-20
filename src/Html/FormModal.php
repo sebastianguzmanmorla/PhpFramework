@@ -45,6 +45,7 @@ class FormModal extends Form
     }
 
     public function ModalLink(
+        Url|Closure|string|null $Action = null,
         ?string $Id = null,
         ?string $Class = null,
         ?Color $Color = null,
@@ -55,6 +56,7 @@ class FormModal extends Form
         array $Values = []
     ): FormModalLink {
         return new FormModalLink(
+            Action: $Action ?? $this->Action,
             Modal: $this->Id,
             Id: $Id,
             Class: $Class,
@@ -126,7 +128,9 @@ $(function() {
                 */
         ?>
         $.each(get,function(key, value){
-            if(typeof value === 'object'){
+            if(key=='action'){
+                $('form#<?= $this->Id ?>').attr('action', value);
+            }else if(typeof value === 'object'){
                 $.each(value, function(key2, value2){
                     if(key2=='text'){
                         $('#<?= $this->Id ?> #'+key).text(value2);

@@ -3,6 +3,8 @@
 namespace PhpFramework;
 
 use DateTime;
+use PhpFramework\Attributes\Hashid;
+use PhpFramework\Attributes\Parameter;
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Request\IRequestFilter;
 use PhpFramework\Response\ErrorJsonResponse;

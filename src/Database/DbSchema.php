@@ -3,59 +3,75 @@
 namespace PhpFramework\Database;
 
 use Exception;
+use Generator;
 use PhpFramework\Database\Attributes\Schema;
 use PhpFramework\Database\Attributes\Table;
 use PhpFramework\Database\Connection\IConnection;
-use ReflectionClass;
 use ReflectionProperty;
 use Throwable;
 
-class DbSchema
+abstract class DbSchema extends Schema
 {
-    public readonly IConnection $Connection;
+    public bool $Locked = false;
 
-    public DbQuery $Query;
+    public self $Schema;
 
-    public $locked = false;
+    public ?DbQuery $Query = null;
 
-    public ?Schema $Schema = null;
-
-    /**
-     * @var DbTable[]
-     */
-    public array $Tables = [];
+    private readonly IConnection $Connection;
 
     private bool $Connected = false;
 
-    public function __construct(
+    public function __toString()
+    {
+        return $this->Name;
+    }
+
+    public static function Initialize(
         IConnection $Connection
-    ) {
-        $this->Connection = $Connection;
+    ): static {
+        $DbSchema = new static();
 
-        $ReflectionClass = new ReflectionClass($this);
+        $DbSchema->InitializeReflection($DbSchema::class);
 
-        $Schema = $ReflectionClass->getAttributes(Schema::class);
+        $Schema = $DbSchema->ReflectionClass->getAttributes(Schema::class);
 
-        $this->Schema = isset($Schema[0]) ? $Schema[0]->newInstance() : null;
-
-        if ($this->Schema === null) {
-            throw new Exception('Schema Attribute not found at class ' . $this::class);
+        if (!isset($Schema[0])) {
+            throw new Exception('Schema Attribute not found at class ' . $DbSchema::class);
         }
 
-        foreach ($ReflectionClass->getProperties(ReflectionProperty::IS_PUBLIC) as $Property) {
-            $Table = $Property->getAttributes(Table::class);
+        $Schema = $Schema[0]->newInstance();
+
+        $DbSchema->Name = $Schema->Name;
+
+        $DbSchema->Schema = clone $DbSchema;
+
+        $DbSchema->Schema->Schema = &$DbSchema->Schema;
+
+        foreach ($DbSchema->ReflectionClass->getProperties(ReflectionProperty::IS_PUBLIC) as $DbSchemaProperty) {
+            $Table = $DbSchemaProperty->getAttributes(Table::class);
             $Table = isset($Table[0]) ? $Table[0]->newInstance() : null;
 
             if ($Table !== null) {
-                $Table->DbSchema = &$this;
+                $DbSet = new DbSet();
 
-                $DbSet = new DbSet($this, $Table);
+                $DbTable = $Table->newInstance();
 
-                $Property->setValue($this, $DbSet);
+                $DbTable->Initialize($DbSchema->Schema, $DbSet, $DbSchemaProperty);
 
-                $this->Tables[$Table->DbTable::class] = $Table;
+                $Table->InitializeFields($DbSchema, $DbTable);
+
+                $DbSet->Initialize($DbSchema, $DbTable);
+
+                $DbSchemaProperty->setValue($DbSchema, $DbSet);
+
+                $DbSchemaProperty->setValue($DbSchema->Schema, $DbTable);
             }
         }
+
+        $DbSchema->Connection = $Connection;
+
+        return $DbSchema;
     }
 
     public function Connection(): IConnection
@@ -73,11 +89,35 @@ class DbSchema
         return $this->Connection;
     }
 
+    public function Tables(): Generator
+    {
+        foreach ($this->ReflectionClass->getProperties(ReflectionProperty::IS_PUBLIC) as $Property) {
+            $Table = $Property->getValue($this->Schema);
+
+            if ($Table instanceof DbTable) {
+                yield $Table;
+            }
+        }
+    }
+
+    public function TableByClass(string $ClassName): ?DbTable
+    {
+        foreach ($this->ReflectionClass->getProperties(ReflectionProperty::IS_PUBLIC) as $Property) {
+            $Table = $Property->getValue($this->Schema);
+
+            if ($Table instanceof DbTable && $Table::class == $ClassName) {
+                return $Table;
+            }
+        }
+
+        return null;
+    }
+
     public function Execute(DbQuery $Query)
     {
         $this->Query = $Query;
 
-        if ($this->Connection() === false || $this->locked) {
+        if ($this->Connection() === false || $this->Locked) {
             return new DbResourceSet();
         }
 

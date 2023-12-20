@@ -27,6 +27,10 @@ class Login extends Layout
 
         $Context->Scripts->Add(
             new ComponentsScript(
+                Src: 'https://code.jquery.com/jquery-3.7.1.min.js',
+                Integrity: 'sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo='
+            ),
+            new ComponentsScript(
                 Src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js',
                 Integrity: 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL'
             ),
@@ -52,7 +56,7 @@ class Login extends Layout
     <div class="col p-3 align-self-start">
         <?= $Context->Form?->Open() ?>
         <div class="card">
-            <div class="card-header text-bg-success">
+            <div class="card-header text-bg-primary">
                 <h5 class="card-title my-0 text-center"><?= $Context->Title ?></h5>
             </div>
             <div class="card-body">

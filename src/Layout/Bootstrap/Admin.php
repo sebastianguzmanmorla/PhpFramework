@@ -45,6 +45,10 @@ class Admin extends Layout
 
         $Context->Scripts->Add(
             new ComponentsScript(
+                Src: 'https://code.jquery.com/jquery-3.7.1.min.js',
+                Integrity: 'sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo='
+            ),
+            new ComponentsScript(
                 Src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js',
                 Integrity: 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL'
             ),
@@ -77,54 +81,12 @@ class Admin extends Layout
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?= new Markup(Dom: 'title', Content: $Context->Title) ?>
 <?= $Context->Stylesheets ?>
-<style>
-aside
-{
-	z-index: 1041!important;
-}
-aside .nav-pills .nav-link.active, aside .nav-pills .show>.nav-link
-{
-	color: #fff;
-	background-color: var(--bs-success);
-}
-aside .nav-link:not(.active):focus, aside .nav-link:not(.active):hover
-{
-	color: var(--bs-success)!important;
-	background-color: var(--bs-light);
-}
-aside .nav .list-unstyled
-{
-	margin-left: 1rem;
-}
-aside .nav-link[data-bs-toggle="collapse"]::after
-{
-  width: 1.25em;
-  line-height: 0;
-  content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%28255,255,255,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
-  transition: transform .35s ease;
-  transform-origin: .5em 50%;
-}
-aside .nav-link[aria-expanded="true"]::after
-{
-  transform: rotate(90deg);
-}
-aside .nav-link[data-bs-toggle="collapse"]:not(.active):focus::after, aside .nav-link[data-bs-toggle="collapse"]:not(.active):hover::after
-{
-  content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%280,0,0,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
-}
-.dataTables_paginate .page-link:not([aria-disabled="true"])
-{
-    color: #fff;
-    background-color: var(--bs-success);
-    border-color: var(--bs-success);
-}
-</style>
 </head>
 <body>
 <div class="g-0">
 	<aside class="fixed-top offcanvas-md offcanvas-start text-bg-dark px-2 col-md-2" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
 		<div class="d-flex flex-column vh-100">
-			<div class="d-flex flex-row py-3">
+			<div class="d-flex flex-row py-3 w-100">
                 <?= $Context instanceof Brand ? $Context->Brand() : null ?>
 				<a class="btn btn-sm btn-dark d-md-none py-0 mx-0 align-self-center" role="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="true" aria-label="Toggle navigation">
 					<i class="fa fa-close fa-fw"></i>
@@ -154,7 +116,7 @@ aside .nav-link[data-bs-toggle="collapse"]:not(.active):focus::after, aside .nav
 <div class="row g-0 pt-5">
 	<main class="col col-md-10 ms-auto">
         <?= $Context->Form?->Open() ?>
-		<div class="shadow sticky-top d-flex justify-content-between flex-wrap align-items-center text-success bg-secondary-subtle py-2 px-3 border-bottom border-success" style="top:54px;">
+		<div class="shadow sticky-top d-flex justify-content-between flex-wrap align-items-center text-primary bg-secondary-subtle py-2 px-3 border-bottom border-primary" style="top:54px;">
             <h5 class="card-title my-2">
                 <?= new Markup(
             Dom: 'span',

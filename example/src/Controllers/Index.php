@@ -23,7 +23,7 @@ class Index extends Controller
     private const LoginLimit = 3;
 
     #[Singleton]
-    public \Database\Framework $Database;
+    private \Database\Framework $Database;
 
     #[Route('Index')]
     public function Index(): RedirectResponse

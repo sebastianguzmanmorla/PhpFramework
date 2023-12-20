@@ -4,6 +4,7 @@ namespace PhpFramework\Html;
 
 use Closure;
 use Exception;
+use PhpFramework\Database\Attributes\Field;
 use PhpFramework\Html\Enums\InputType;
 use PhpFramework\Html\Validation\IValidation;
 use PhpFramework\Html\Validation\IValidationRule;
@@ -37,7 +38,8 @@ class FormInput extends Markup implements IValidation
         Closure|bool|null $Disabled = null,
         Closure|bool|null $ReadOnly = null,
         Closure|false|array|null $Format = null,
-        IValidationRule|array|null $ValidationRule = null
+        IValidationRule|array|null $ValidationRule = null,
+        ?Field $Field = null
     ) {
         parent::__construct(
             Dom: $Dom,
@@ -64,6 +66,14 @@ class FormInput extends Markup implements IValidation
             } else {
                 $this->Validation->AddRule($ValidationRule);
             }
+        }
+
+        if ($Field !== null) {
+            $this->Validation->AddRule(...$Field->ValidationRules);
+            $this->Id ??= $Field->Field;
+            $this->Name ??= $Field->Field;
+            $this->Label ??= $Field->Label;
+            $this->MaxLength ??= $Field->MaxLength;
         }
     }
 

@@ -27,8 +27,8 @@ class Config
         public int $SessionLifetime = 86400,
         public string $SessionPath = '/',
         public ?string $SessionDomain = null,
-        public bool $SessionSecure = true,
-        public bool $SessionHttpOnly = true
+        public bool $SessionSecure = false,
+        public bool $SessionHttpOnly = false
     ) {
     }
 
@@ -39,7 +39,7 @@ class Config
         if (getenv('APP_ENV') == 'local') {
             ini_set('display_errors', 1);
             ini_set('display_startup_errors', 1);
-            ini_set('xdebug.var_display_max_depth', -1);
+            ini_set('xdebug.var_display_max_depth', 5);
             ini_set('xdebug.var_display_max_children', -1);
             ini_set('xdebug.var_display_max_data', -1);
             error_reporting(E_ALL);
@@ -59,7 +59,7 @@ class Config
 
         Hashids::Init(self::Current()->HashidsSalt);
 
-        $Database = new \Database\Framework(new MySql(
+        $Database = \Database\Framework::Initialize(new MySql(
             Hostname: self::Current()->Hostname,
             Port: self::Current()->Port,
             Username: self::Current()->Username,

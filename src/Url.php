@@ -5,6 +5,7 @@ namespace PhpFramework;
 use ArrayObject;
 use Closure;
 use Exception;
+use PhpFramework\Attributes\Hashid;
 use PhpFramework\Database\Helpers\SourceReader;
 use ReflectionClass;
 use ReflectionFunction;

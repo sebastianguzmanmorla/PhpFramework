@@ -4,6 +4,7 @@ namespace Views\Admin\Usuario;
 
 use Controllers\Admin\Usuario as AdminUsuario;
 use Database\Framework\Usuario;
+use Model\Layout\HtmlResponse;
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Html\Enums\ButtonType;
 use PhpFramework\Html\Enums\Color;
@@ -20,7 +21,6 @@ use PhpFramework\Html\Validation\Rules\IsValidEmail;
 use PhpFramework\Html\Validation\Rules\IsValidRut;
 use PhpFramework\Html\Validation\Rules\Validate;
 use PhpFramework\Layout\Section\Toolbar;
-use PhpFramework\Response\HtmlResponse;
 
 #[Form(Method: FormMethod::POST)]
 class Editar extends HtmlResponse implements Toolbar
@@ -110,12 +110,12 @@ class Editar extends HtmlResponse implements Toolbar
         );
 
         $this->usu_nombre = new FormInput(
-            Field: $this->Database->Definition->Usuario->usu_nombre,
+            Field: $this->Database->Schema->Usuario->usu_nombre,
             Value: fn () => $this->Usuario->usu_nombre ?? ''
         );
 
         $this->usu_apellido = new FormInput(
-            Field: $this->Database->Definition->Usuario->usu_apellido,
+            Field: $this->Database->Schema->Usuario->usu_apellido,
             Value: fn () => $this->Usuario->usu_apellido ?? ''
         );
 
@@ -129,7 +129,7 @@ class Editar extends HtmlResponse implements Toolbar
         $this->Guardar = new FormButton(
             Label: 'Guardar',
             Icon: 'fa fa-save',
-            Color: Color::Success,
+            Color: Color::Primary,
             Type: ButtonType::Submit
         );
     }

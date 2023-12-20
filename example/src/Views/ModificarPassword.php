@@ -2,8 +2,10 @@
 
 namespace Views;
 
+use Controllers\Admin\Usuario as AdminUsuario;
 use Database\Framework\TipoUsuario;
 use Database\Framework\Usuario;
+use Model\Layout\HtmlResponse;
 use PhpFramework\Html\Enums\ButtonType;
 use PhpFramework\Html\Enums\Color;
 use PhpFramework\Html\Enums\FormMethod;
@@ -11,10 +13,10 @@ use PhpFramework\Html\Enums\InputType;
 use PhpFramework\Html\Form;
 use PhpFramework\Html\FormButton;
 use PhpFramework\Html\FormInput;
+use PhpFramework\Html\FormLink;
 use PhpFramework\Html\Validation\Rules\IsNotNullOrEmpty;
 use PhpFramework\Html\Validation\Rules\IsValidPassword;
 use PhpFramework\Layout\Section\Toolbar;
-use PhpFramework\Response\HtmlResponse;
 
 #[Form(Method: FormMethod::POST)]
 class ModificarPassword extends HtmlResponse implements Toolbar
@@ -36,6 +38,8 @@ class ModificarPassword extends HtmlResponse implements Toolbar
     public FormInput $usu_apellido;
 
     public FormInput $usu_pass;
+
+    public ?FormLink $Volver = null;
 
     public FormButton $Guardar;
 
@@ -99,15 +103,24 @@ class ModificarPassword extends HtmlResponse implements Toolbar
         $this->Guardar = new FormButton(
             Label: 'Guardar',
             Icon: 'fa fa-save',
-            Color: Color::Success,
+            Color: Color::Primary,
             Type: ButtonType::Submit
         );
     }
 
     public function Toolbar(): void
     {
+        if ($this->Usuario !== null) {
+            $this->Volver = new FormLink(
+                Href: fn (AdminUsuario $x) => $x->Index(),
+                Icon: 'fa fa-arrow-left',
+                Label: 'Volver',
+                Color: Color::Light
+            );
+        }
         ?>
 <div class="btn-group">
+    <?= $this->Volver ?>
     <?= $this->Guardar ?>
 </div>
 <?php

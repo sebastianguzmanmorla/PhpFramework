@@ -18,13 +18,15 @@ class Modulo extends DbTable
         public Field|int|null $id_modulo = null,
         #[Field(
             Field: 'id_modulopadre',
-            Type: DbType::UnsignedInt
+            Type: DbType::UnsignedInt,
+            Default: 0
         )]
         public Field|int|null $id_modulopadre = null,
         #[Field(
             Field: 'mod_icon',
             Type: DbType::Varchar,
-            FieldLength: 50
+            FieldLength: 50,
+            AllowNull: true
         )]
         public Field|string|null $mod_icon = null,
         #[Field(

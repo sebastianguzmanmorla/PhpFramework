@@ -3,6 +3,7 @@
 namespace Views;
 
 use Controllers\Index;
+use Model\Layout\HtmlResponse;
 use PhpFramework\Html\Enums\Color;
 use PhpFramework\Html\Enums\InputType;
 use PhpFramework\Html\Form;
@@ -12,7 +13,6 @@ use PhpFramework\Html\FormLink;
 use PhpFramework\Layout\Bootstrap\Login as BootstrapLogin;
 use PhpFramework\Layout\Section\Toolbar;
 use PhpFramework\Layout\UseLayout;
-use PhpFramework\Response\HtmlResponse;
 
 #[Form(AutoComplete: false), UseLayout(BootstrapLogin::class)]
 class Login extends HtmlResponse implements Toolbar
@@ -50,13 +50,13 @@ class Login extends HtmlResponse implements Toolbar
         $this->Ingresar = new FormButton(
             Label: 'Ingresar',
             Icon: 'fa fa-sign-in',
-            Color: Color::Success
+            Color: Color::Primary
         );
 
         $this->Recuperar = new FormLink(
             Label: 'Recuperar Contraseña',
             Icon: 'fa fa-key',
-            Color: Color::Success,
+            Color: Color::Primary,
             Href: fn (Index $Index) => $Index->Recuperar()
         );
 

@@ -24,7 +24,7 @@ class PermisoUsuarioFilter implements IRequestFilter
     public static ?Permiso $Permiso = null;
 
     #[Singleton]
-    public \Database\Framework $Database;
+    private \Database\Framework $Database;
 
     public function Filter(): ?IResponse
     {

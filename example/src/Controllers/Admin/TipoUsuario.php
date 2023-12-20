@@ -4,10 +4,10 @@ namespace Controllers\Admin;
 
 use Database\Framework\TipoUsuario as DbTipoUsuario;
 use Model\TipoUsuario\TipoUsuarioItem;
+use PhpFramework\Attributes\Hashid;
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Controller;
 use PhpFramework\Database\Enumerations\DbWhere;
-use PhpFramework\Hashid;
 use PhpFramework\Html\Enums\Color;
 use PhpFramework\Html\FormLink;
 use PhpFramework\Html\Markup;
@@ -24,7 +24,7 @@ use Request\PermisoUsuarioFilter;
 class TipoUsuario extends Controller
 {
     #[Singleton]
-    public \Database\Framework $Database;
+    private \Database\Framework $Database;
 
     #[Route('Admin/TipoUsuario'), PermisoUsuarioFilter]
     public function Index(
@@ -48,7 +48,7 @@ class TipoUsuario extends Controller
         return $View;
     }
 
-    #[Route('Admin/TipoUsuario/Listado'), PermisoUsuarioFilter]
+    #[Route('Admin/TipoUsuario/Listado', Method::POST), PermisoUsuarioFilter]
     public function Listado(
         ?int $id_tipousuario = null,
         ?string $tus_nombre = null,

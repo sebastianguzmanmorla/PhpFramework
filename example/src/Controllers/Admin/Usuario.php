@@ -5,10 +5,10 @@ namespace Controllers\Admin;
 use Database\Framework\TipoUsuario;
 use Database\Framework\Usuario as DbUsuario;
 use Model\Usuario\UsuarioItem;
+use PhpFramework\Attributes\Hashid;
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Controller;
 use PhpFramework\Database\Enumerations\DbWhere;
-use PhpFramework\Hashid;
 use PhpFramework\Html\Components\Alert;
 use PhpFramework\Html\Enums\AlertType;
 use PhpFramework\Html\Enums\Color;
@@ -28,7 +28,7 @@ use Request\PermisoUsuarioFilter;
 class Usuario extends Controller
 {
     #[Singleton]
-    public \Database\Framework $Database;
+    private \Database\Framework $Database;
 
     #[Route('Admin/Usuario'), PermisoUsuarioFilter]
     public function Index(
@@ -93,7 +93,7 @@ class Usuario extends Controller
         return $View;
     }
 
-    #[Route('Admin/Usuario/Listado'), PermisoUsuarioFilter]
+    #[Route('Admin/Usuario/Listado', Method::POST), PermisoUsuarioFilter]
     public function Listado(
         ?int $id_usuario = null,
         ?int $id_tipousuario = null,

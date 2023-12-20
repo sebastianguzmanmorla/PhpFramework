@@ -8,7 +8,6 @@ use DateTime;
 use Exception;
 use Generator;
 use PhpFramework\Database\Attributes\Field;
-use PhpFramework\Database\Attributes\Table;
 use PhpFramework\Database\Enumerations\DbLogic;
 use PhpFramework\Database\Enumerations\DbOrder;
 use PhpFramework\Database\Enumerations\DbType;
@@ -20,9 +19,9 @@ use ReflectionFunction;
 
 class DbSet
 {
-    public DbSchema $DbSchema;
+    protected DbSchema $DbSchema;
 
-    public Table $Table;
+    protected DbTable $Table;
 
     /**
      * @var array<DbQuery>
@@ -49,15 +48,10 @@ class DbSet
      */
     protected array $Where = [];
 
-    public function __construct(DbSchema &$DbSchema, Table &$Table)
+    public function Initialize(DbSchema &$DbSchema, DbTable &$Table): void
     {
         $this->DbSchema = $DbSchema;
         $this->Table = $Table;
-    }
-
-    public function Table(string $Name): ?Table
-    {
-        return $this->DbSchema->Tables[$Name] ?? null;
     }
 
     public function InnerJoin(Closure $InnerJoin): static
@@ -70,7 +64,7 @@ class DbSet
             throw new Exception('El parametro no es de la clase requerida.', false);
         }
 
-        $Table = $this->Table($Parameter->getType()->getName());
+        $Table = $this->DbSchema->TableByClass($Parameter->getType()->getName());
 
         if ($Table === null) {
             throw new Exception('El parametro no es de la clase requerida.', false);
@@ -115,7 +109,7 @@ class DbSet
             throw new Exception('El parametro no es de la clase requerida.', false);
         }
 
-        $Table = $this->Table($Parameter->getType()->getName());
+        $Table = $this->DbSchema->TableByClass($Parameter->getType()->getName());
 
         if ($Table === null) {
             throw new Exception('El parametro no es de la clase requerida.', false);
@@ -194,6 +188,19 @@ class DbSet
         return $Instance;
     }
 
+    public function WhereValue(DbValue $Where, DbLogic $Prefix = DbLogic::And): static
+    {
+        $Instance = $this->GenerateInstance();
+
+        $Instance->Where[] = new DbQuery(
+            Prefix: $Prefix,
+            Query: [$Where],
+            Parameters: $Where->Value !== null ? (is_array($Where->Value) ? $Where->Value : [$Where->Value]) : []
+        );
+
+        return $Instance;
+    }
+
     public function GroupBy(Closure $GroupBy): static
     {
         $Instance = $this->GenerateInstance();
@@ -224,44 +231,66 @@ class DbSet
         return $Instance;
     }
 
-    public function InsertQuery(DbTable $Value): DbQuery
+    public function InsertQuery(DbTable ...$Items): DbQuery
     {
         $Query = ['INSERT INTO ' . $this->Table . ' ('];
         $QueryFields = [];
         $Values = [];
         $Parameters = [];
+        $OnDuplicateKeyUpdate = false;
 
-        $Reflection = new ReflectionClass($Value);
+        foreach ($this->Table->Fields() as $Field) {
+            if (!empty($QueryFields)) {
+                $QueryFields[] = ', ';
+            }
+            $QueryFields[] = $Field->Field;
+        }
 
-        $Fields = $Reflection->getProperties();
+        foreach ($Items as $n => $Item) {
+            if ($Item::class !== $this->Table::class) {
+                throw new Exception('El parametro no es de la clase requerida.', false);
+            }
 
-        foreach ($Fields as $Field) {
-            $FieldAttribute = $Field->getAttributes(Field::class);
-            $FieldAttribute = isset($FieldAttribute[0]) ? $FieldAttribute[0]->newInstance() : null;
-            if ($FieldAttribute != null) {
-                $FieldValue = $Field->getValue($Value);
+            foreach ($this->Table->Fields() as $Field) {
+                if (!isset($Values[$n])) {
+                    $Values[$n] = [];
+                }
+                $FieldValue = $Field->getValue($Item);
+
+                if ($Field->PrimaryKey && $FieldValue !== null) {
+                    $OnDuplicateKeyUpdate = true;
+                }
+
                 if ($FieldValue !== null) {
-                    if (!empty($QueryFields)) {
-                        $QueryFields[] = ', ';
-                    }
-                    $QueryFields[] = $FieldAttribute->Field;
-
-                    if (!empty($Parameters)) {
-                        $Values[] = ', ';
-                    }
-                    $Values[] = new DbValue(Value: $FieldValue);
+                    $Values[$n][] = new DbValue(Value: $FieldValue);
                     $Parameters[] = $FieldValue;
+                } elseif ($Field->Default !== null) {
+                    $Values[$n][] = new DbValue(Value: $Field->Default);
+                    $Parameters[] = $Field->Default;
+                } else {
+                    $Values[$n][] = new DbValue(Value: null);
+                    $Parameters[] = null;
                 }
             }
         }
 
         array_push($Query, ...$QueryFields);
 
-        $Query[] = ') VALUES (';
+        $Values = implode('),(', array_map(fn ($item) => implode(',', $item), $Values));
 
-        array_push($Query, ...$Values);
+        $Query[] = ') VALUES (' . $Values . ')';
 
-        $Query[] = ')';
+        if ($OnDuplicateKeyUpdate) {
+            $Query[] = ' ON DUPLICATE KEY UPDATE ';
+
+            $Update = [];
+
+            foreach ($this->Table->Fields() as $Field) {
+                $Update[] = $Field->Field . ' = VALUES(' . $Field->Field . ')';
+            }
+
+            $Query[] = implode(', ', $Update);
+        }
 
         return new DbQuery(
             Query: $Query,
@@ -397,19 +426,33 @@ class DbSet
         );
     }
 
-    public function Insert(DbTable &$Insert): bool
+    public function Insert(DbTable &...$Insert): bool
     {
-        if ($this->DbSchema->Connection() === false || $this->DbSchema->locked) {
+        if ($this->DbSchema->Connection() === false || $this->DbSchema->Locked) {
             return false;
         }
 
-        $Query = $this->InsertQuery($Insert);
+        $Query = $this->InsertQuery(...$Insert);
+
+        $Single = count($Insert) == 1;
 
         $this->DbSchema->Query = $Query;
 
-        if ($Statement = $this->DbSchema->Connection()->Prepare($Query, $this->Table->GetPrimaryKey())) {
+        $PrimaryKey = $this->Table->GetPrimaryKey();
+
+        if ($Statement = $this->DbSchema->Connection()->Prepare($Query, $PrimaryKey)) {
             if ($Statement->Execute()) {
-                $this->Table->SetPrimaryKey($Insert, $Statement->InsertId());
+                $InsertId = $Statement->InsertId();
+
+                if ($InsertId !== false && $Single) {
+                    $this->Table->SetPrimaryKeyValue($Insert[0], $InsertId);
+                }
+
+                if (is_int($InsertId) && $Insert > 0 && !$Single) {
+                    foreach ($Insert as $Index => $Item) {
+                        $this->Table->SetPrimaryKeyValue($Item, $InsertId + $Index);
+                    }
+                }
 
                 $Statement->Close();
 
@@ -428,7 +471,7 @@ class DbSet
 
     public function DeleteExecute()
     {
-        if ($this->DbSchema->Connection() === false || $this->DbSchema->locked) {
+        if ($this->DbSchema->Connection() === false || $this->DbSchema->Locked) {
             return false;
         }
         $Query = $this->DeleteQuery();
@@ -446,7 +489,7 @@ class DbSet
 
     public function Select(?Closure $Select = null, ?int $Offset = null, ?int $Limit = null, ?TableRequest $TableRequest = null)
     {
-        if ($this->DbSchema->Connection() === false || $this->DbSchema->locked) {
+        if ($this->DbSchema->Connection() === false || $this->DbSchema->Locked) {
             return new DbResourceSet();
         }
 
@@ -507,7 +550,7 @@ class DbSet
                     if (!$ParameterClass->isSubclassOf(DbTable::class)) {
                         throw new Exception('El parametro no es de la clase requerida.', false);
                     }
-                    $UsedClasses[$ParameterClass->getName()] = $this->Table($ParameterType->getName());
+                    $UsedClasses[$ParameterClass->getName()] = $this->DbSchema->TableByClass($ParameterType->getName());
                 }
             }
 
@@ -521,7 +564,9 @@ class DbSet
         $Total = null;
 
         if ($Offset !== null && $Limit !== null) {
-            $CountQuery = $this->SelectQuery($this->Table->GetPrimaryKey());
+            $PrimaryKeys = iterator_to_array($this->Table->GetPrimaryKeys());
+
+            $CountQuery = $this->SelectQuery(...$PrimaryKeys);
 
             $TotalQuery = new DbQuery(
                 Parameters: $CountQuery->Parameters
@@ -558,7 +603,7 @@ class DbSet
                             foreach ($Data as &$Row) {
                                 $Args = [];
                                 foreach ($UsedClasses as $ClassName => $Class) {
-                                    $Arg = $Class->Reflection->newInstance();
+                                    $Arg = $Class->newInstance();
 
                                     foreach ($SelectFields as $Index => $Field) {
                                         if ($Field::class !== $ClassName && $Field->Field != '*') {
@@ -592,7 +637,7 @@ class DbSet
                                                 $Value = (float) $Value;
                                             }
 
-                                            $Field->Reflection->setValue($Arg, $Value);
+                                            $Field->SetValue($Arg, $Value);
                                         }
                                     }
 
@@ -604,7 +649,7 @@ class DbSet
                         } else {
                             if (empty($this->InnerJoin) && empty($this->LeftJoin)) {
                                 foreach ($Data as &$Row) {
-                                    $Class = $this->Table->Reflection->newInstance();
+                                    $Class = $this->Table->newInstance();
                                     $Index = 0;
                                     foreach ($this->Table->Fields() as $Field) {
                                         $Value = $Row[$Index];
@@ -637,7 +682,7 @@ class DbSet
                                             $Value = (float) $Value;
                                         }
 
-                                        $Field->Reflection->setValue($Class, $Value);
+                                        $Field->SetValue($Class, $Value);
 
                                         ++$Index;
                                     }
@@ -650,20 +695,20 @@ class DbSet
 
                                 $From = $this->Table;
 
-                                $Fields[$From->Reflection->getShortName()]['Reflection'] = $From->Reflection;
+                                $Fields[$From->getShortName()]['Reflection'] = $From;
 
                                 foreach ($From->Fields() as $Field) {
-                                    $Fields[$From->Reflection->getShortName()]['Fields'][$FieldPosition] = $Field;
+                                    $Fields[$From->getShortName()]['Fields'][$FieldPosition] = $Field;
                                     ++$FieldPosition;
                                 }
 
                                 foreach ($this->InnerJoin as $Join) {
                                     $Set = $Join->Table;
 
-                                    $Fields[$Set->Reflection->getShortName()]['Reflection'] = $Set->Reflection;
+                                    $Fields[$Set->getShortName()]['Reflection'] = $Set;
 
                                     foreach ($Set->Fields() as $field) {
-                                        $Fields[$Set->Reflection->getShortName()]['Fields'][$FieldPosition] = $field;
+                                        $Fields[$Set->getShortName()]['Fields'][$FieldPosition] = $field;
                                         ++$FieldPosition;
                                     }
                                 }
@@ -671,10 +716,10 @@ class DbSet
                                 foreach ($this->LeftJoin as $Join) {
                                     $Set = $Join->Table;
 
-                                    $Fields[$Set->Reflection->getShortName()]['Reflection'] = $Set->Reflection;
+                                    $Fields[$Set->getShortName()]['Reflection'] = $Set;
 
                                     foreach ($Set->Fields() as $field) {
-                                        $Fields[$Set->Reflection->getShortName()]['Fields'][$FieldPosition] = $field;
+                                        $Fields[$Set->getShortName()]['Fields'][$FieldPosition] = $field;
                                         ++$FieldPosition;
                                     }
                                 }
@@ -716,7 +761,7 @@ class DbSet
                                                 $Value = (float) $Value;
                                             }
 
-                                            $Field->Reflection->setValue($Table, $Value);
+                                            $Field->SetValue($Table, $Value);
                                         }
 
                                         $Item->__set($Name, $Table);
@@ -744,13 +789,13 @@ class DbSet
                 throw new Exception($this->DbSchema->Connection()->Error() . $Query->__toString());
             }
         } catch (Exception $e) {
-            throw new Exception($e->getMessage() . $Query->__toString());
+            throw new Exception($e->getMessage() . ' - ' . $Query->__toString());
         }
     }
 
     public function UpdateExecute(DbTable $attr, $old_select = true)
     {
-        if ($this->DbSchema->Connection() === false || $this->DbSchema->locked) {
+        if ($this->DbSchema->Connection() === false || $this->DbSchema->Locked) {
             return false;
         }
 
@@ -856,7 +901,7 @@ class DbSet
                 if (!$ParameterClass->isSubclassOf(DbTable::class)) {
                     throw new Exception('El parametro no es de la clase requerida.', false);
                 }
-                $Parameters['$' . $Parameter->getName()] = $this->Table($ParameterType->getName());
+                $Parameters['$' . $Parameter->getName()] = $this->DbSchema->TableByClass($ParameterType->getName());
             }
         }
 
@@ -876,9 +921,9 @@ class DbSet
                     $Tokens->next();
                     yield $Instance->Field($Token()->text);
                 } else {
-                    $All = new Field(Field: '*');
-                    $All->Table = &$Instance;
-                    yield $All;
+                    foreach ($Instance->Fields() as $Field) {
+                        yield $Field;
+                    }
                 }
             }
             $Tokens->next();
@@ -1090,7 +1135,7 @@ class DbSet
                 if (!$ParameterClass->isSubclassOf(DbTable::class)) {
                     throw new Exception('El parametro no es de la clase requerida.', false);
                 }
-                $Parameters['$' . $Parameter->getName()] = $this->Table($ParameterType->getName());
+                $Parameters['$' . $Parameter->getName()] = $this->DbSchema->TableByClass($ParameterType->getName());
             }
         }
 

@@ -3,6 +3,7 @@
 namespace Views;
 
 use Controllers\Index;
+use Model\Layout\HtmlResponse;
 use PhpFramework\Html\Enums\ButtonType;
 use PhpFramework\Html\Enums\Color;
 use PhpFramework\Html\Enums\InputType;
@@ -13,7 +14,6 @@ use PhpFramework\Html\FormLink;
 use PhpFramework\Layout\Bootstrap\Login as BootstrapLogin;
 use PhpFramework\Layout\Section\Toolbar;
 use PhpFramework\Layout\UseLayout;
-use PhpFramework\Response\HtmlResponse;
 
 #[Form(AutoComplete: false), UseLayout(BootstrapLogin::class)]
 class Recuperar extends HtmlResponse implements Toolbar
@@ -40,7 +40,7 @@ class Recuperar extends HtmlResponse implements Toolbar
             Label: 'Recuperar Contraseña',
             Icon: 'fa fa-sign-in',
             Type: ButtonType::Submit,
-            Color: Color::Success
+            Color: Color::Primary
         );
 
         $this->Volver = new FormLink(

@@ -76,6 +76,8 @@ class Markup implements JsonSerializable
         public ?string $DataBsPlacement = null,
         #[MarkupAttribute('aria-current')]
         public ?string $AriaCurrent = null,
+        #[MarkupAttribute('aria-controls')]
+        public ?string $AriaControls = null,
         #[MarkupAttribute('aria-expanded')]
         public ?string $AriaExpanded = null,
         #[MarkupAttribute('aria-described-by')]

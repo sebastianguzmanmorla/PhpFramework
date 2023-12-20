@@ -80,7 +80,7 @@ abstract class HtmlResponse implements IResponse
             $Attributes = $Property->getAttributes();
             foreach ($Attributes as $Attribute) {
                 $Value = $Attribute->newInstance();
-                if ($Value instanceof Html) {
+                if ($Value instanceof Markup) {
                     $Property->setValue($this, $Value);
                 }
             }
@@ -124,7 +124,7 @@ abstract class HtmlResponse implements IResponse
         return $Body;
     }
 
-    final public function Validate(): bool
+    final public function Validate(mixed $Context = null): bool
     {
         $Valid = true;
 
@@ -134,7 +134,7 @@ abstract class HtmlResponse implements IResponse
             if ($Property->isInitialized($this)) {
                 $Value = $Property->getValue($this);
 
-                if ($Value instanceof Html && $Value->Disabled !== null) {
+                if ($Value instanceof Markup && $Value->Disabled !== null) {
                     $Disabled = $Value->Disabled;
 
                     if ($Disabled instanceof Closure) {
@@ -147,7 +147,7 @@ abstract class HtmlResponse implements IResponse
                 }
 
                 if ($Value !== null && $Value instanceof IValidation) {
-                    if (!$Value->Validation()->Validate()) {
+                    if (!$Value->Validation()->Validate($Context)) {
                         $Valid = false;
                     }
                 }

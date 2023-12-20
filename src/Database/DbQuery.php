@@ -4,7 +4,6 @@ namespace PhpFramework\Database;
 
 use Closure;
 use PhpFramework\Database\Attributes\Field;
-use PhpFramework\Database\Attributes\Table;
 use PhpFramework\Database\Enumerations\DbLogic;
 use PhpFramework\Database\Helpers\SqlFormatter;
 
@@ -12,7 +11,7 @@ class DbQuery
 {
     public function __construct(
         public ?DbLogic $Prefix = null,
-        public ?Table $Table = null,
+        public ?DbTable $Table = null,
         public array $Query = [],
         public array $Parameters = [],
         public ?int $Limit = null,
@@ -27,7 +26,7 @@ class DbQuery
         $Parameters = $this->Parameters;
         while (str_contains($Query, '?')) {
             $Value = array_shift($Parameters);
-            $Query = substr_replace($Query, "'" . $Value . "'", strpos($Query, '?'), 1);
+            $Query = substr_replace($Query, ($Value !== null ? "'" . $Value . "'" : 'NULL'), strpos($Query, '?'), 1);
         }
 
         return $Query;

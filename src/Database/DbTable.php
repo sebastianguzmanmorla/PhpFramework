@@ -4,22 +4,19 @@ namespace PhpFramework\Database;
 
 use ArrayAccess;
 use JsonSerializable;
-use ReflectionClass;
+use PhpFramework\Database\Attributes\Table;
 
-class DbTable implements ArrayAccess, JsonSerializable
+class DbTable extends Table implements ArrayAccess, JsonSerializable
 {
     public function __isset(string $name): bool
     {
-        $Reflection = new ReflectionClass($this);
-
-        return $Reflection->hasProperty($name);
+        return $this->ReflectionClass->hasProperty($name);
     }
 
     public function __get(string $name): mixed
     {
-        $Reflection = new ReflectionClass($this);
-        if ($Reflection->hasProperty($name)) {
-            $Property = $Reflection->getProperty($name);
+        if ($this->ReflectionClass->hasProperty($name)) {
+            $Property = $this->ReflectionClass->getProperty($name);
 
             return $Property->getValue($this);
         }
@@ -29,18 +26,16 @@ class DbTable implements ArrayAccess, JsonSerializable
 
     public function __set(string $name, mixed $value): void
     {
-        $Reflection = new ReflectionClass($this);
-        if ($Reflection->hasProperty($name)) {
-            $Property = $Reflection->getProperty($name);
+        if ($this->ReflectionClass->hasProperty($name)) {
+            $Property = $this->ReflectionClass->getProperty($name);
             $Property->setValue($this, $value);
         }
     }
 
     public function __unset(string $name): void
     {
-        $Reflection = new ReflectionClass($this);
-        if ($Reflection->hasProperty($name)) {
-            $Property = $Reflection->getProperty($name);
+        if ($this->ReflectionClass->hasProperty($name)) {
+            $Property = $this->ReflectionClass->getProperty($name);
             $Property->setValue($this, null);
         }
     }

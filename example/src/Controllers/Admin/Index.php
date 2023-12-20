@@ -12,7 +12,7 @@ use Request\PermisoUsuarioFilter;
 class Index extends Controller
 {
     #[Singleton]
-    public \Database\Framework $Database;
+    private \Database\Framework $Database;
 
     #[Route('Admin/Index'), PermisoUsuarioFilter]
     public function Index(): HtmlResponse

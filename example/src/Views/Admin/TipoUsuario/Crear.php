@@ -4,6 +4,7 @@ namespace Views\Admin\TipoUsuario;
 
 use Controllers\Admin\TipoUsuario as AdminTipoUsuario;
 use Database\Framework\TipoUsuario;
+use Model\Layout\HtmlResponse;
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Html\Enums\ButtonType;
 use PhpFramework\Html\Enums\Color;
@@ -13,7 +14,6 @@ use PhpFramework\Html\FormButton;
 use PhpFramework\Html\FormInput;
 use PhpFramework\Html\FormLink;
 use PhpFramework\Layout\Section\Toolbar;
-use PhpFramework\Response\HtmlResponse;
 
 #[Form(Method: FormMethod::POST)]
 class Crear extends HtmlResponse implements Toolbar
@@ -32,7 +32,7 @@ class Crear extends HtmlResponse implements Toolbar
     public function Init(): void
     {
         $this->tus_nombre = new FormInput(
-            Field: $this->Database->Definition->TipoUsuario->tus_nombre,
+            Field: $this->Database->Schema->TipoUsuario->tus_nombre,
             Value: fn () => $this->TipoUsuario->tus_nombre ?? ''
         );
 
@@ -46,7 +46,7 @@ class Crear extends HtmlResponse implements Toolbar
         $this->Crear = new FormButton(
             Label: 'Crear',
             Icon: 'fa fa-plus',
-            Color: Color::Success,
+            Color: Color::Primary,
             Type: ButtonType::Submit
         );
     }

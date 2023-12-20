@@ -18,7 +18,8 @@ class Permiso extends DbTable
         public Field|int|null $id_permiso = null,
         #[Field(
             Field: 'id_permisopadre',
-            Type: DbType::UnsignedInt
+            Type: DbType::UnsignedInt,
+            Default: 0
         )]
         public Field|int|null $id_permisopadre = null,
         #[Field(

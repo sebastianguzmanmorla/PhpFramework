@@ -3,6 +3,7 @@
 namespace Views\Admin\TipoUsuario;
 
 use Controllers\Admin\TipoUsuario;
+use Model\Layout\HtmlResponse;
 use PhpFramework\Html\Enums\ButtonType;
 use PhpFramework\Html\Enums\Color;
 use PhpFramework\Html\Enums\FormMethod;
@@ -16,7 +17,6 @@ use PhpFramework\Html\FormModal;
 use PhpFramework\Layout\Section\Filters;
 use PhpFramework\Layout\Section\Script;
 use PhpFramework\Layout\Section\Toolbar;
-use PhpFramework\Response\HtmlResponse;
 
 #[Form(AutoComplete: false, Method: FormMethod::GET, Id: 'ListadoTipoUsuario')]
 class Index extends HtmlResponse implements Filters, Script, Toolbar
@@ -63,7 +63,7 @@ class Index extends HtmlResponse implements Filters, Script, Toolbar
         $this->Buscar = new FormButton(
             Label: 'Buscar',
             Icon: 'fa fa-search',
-            Color: Color::Success,
+            Color: Color::Primary,
             Type: ButtonType::Submit
         );
 
@@ -142,6 +142,7 @@ class Index extends HtmlResponse implements Filters, Script, Toolbar
             ],
             ajax: {
                 url: '?route=Admin/TipoUsuario/Listado',
+                type: 'POST',
                 data: function (params) {
                     params.id_tipousuario = $('#id_tipousuario').val();
                     params.tus_nombre = $('#tus_nombre').val();

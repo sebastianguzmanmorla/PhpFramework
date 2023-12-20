@@ -2,7 +2,7 @@
 
 namespace Views\Admin;
 
-use PhpFramework\Response\HtmlResponse;
+use Model\Layout\HtmlResponse;
 
 class Index extends HtmlResponse
 {
@@ -14,6 +14,11 @@ class Index extends HtmlResponse
     public function Body(): void
     {
         ?>
+        <div class="card shadow">
+            <div class="card-body">
+                <p class="card-text">Bienvenido al sistema.</p>
+            </div>
+        </div>
 <?php
     }
 }
