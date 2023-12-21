@@ -4,7 +4,6 @@ namespace Views\Admin\Usuario;
 
 use Controllers\Admin\Usuario as AdminUsuario;
 use Database\Framework\Usuario;
-use Model\Layout\HtmlResponse;
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Html\Enums\ButtonType;
 use PhpFramework\Html\Enums\Color;
@@ -21,9 +20,10 @@ use PhpFramework\Html\Validation\Rules\IsValidEmail;
 use PhpFramework\Html\Validation\Rules\IsValidRut;
 use PhpFramework\Html\Validation\Rules\Validate;
 use PhpFramework\Layout\Section\Toolbar;
+use PhpFramework\Response\ViewResponse;
 
 #[Form(Method: FormMethod::POST)]
-class Editar extends HtmlResponse implements Toolbar
+class Editar extends ViewResponse implements Toolbar
 {
     #[Singleton]
     public \Database\Framework $Database;
@@ -46,7 +46,7 @@ class Editar extends HtmlResponse implements Toolbar
 
     public FormButton $Guardar;
 
-    public function Init(): void
+    public function Initialize(): void
     {
         $this->id_tipousuario = new FormSelect(
             Label: 'Tipo de Usuario',

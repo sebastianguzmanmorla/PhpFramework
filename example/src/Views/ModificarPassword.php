@@ -5,7 +5,6 @@ namespace Views;
 use Controllers\Admin\Usuario as AdminUsuario;
 use Database\Framework\TipoUsuario;
 use Database\Framework\Usuario;
-use Model\Layout\HtmlResponse;
 use PhpFramework\Html\Enums\ButtonType;
 use PhpFramework\Html\Enums\Color;
 use PhpFramework\Html\Enums\FormMethod;
@@ -17,9 +16,10 @@ use PhpFramework\Html\FormLink;
 use PhpFramework\Html\Validation\Rules\IsNotNullOrEmpty;
 use PhpFramework\Html\Validation\Rules\IsValidPassword;
 use PhpFramework\Layout\Section\Toolbar;
+use PhpFramework\Response\ViewResponse;
 
 #[Form(Method: FormMethod::POST)]
-class ModificarPassword extends HtmlResponse implements Toolbar
+class ModificarPassword extends ViewResponse implements Toolbar
 {
     public Usuario $Usuario;
 
@@ -43,7 +43,7 @@ class ModificarPassword extends HtmlResponse implements Toolbar
 
     public FormButton $Guardar;
 
-    public function Init(): void
+    public function Initialize(): void
     {
         $this->Title = 'Modificar Contraseña';
 

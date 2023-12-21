@@ -2,11 +2,9 @@
 
 namespace PhpFramework\Layout;
 
-use PhpFramework\Response\HtmlResponse;
+use PhpFramework\Response\ViewResponse;
 
 interface ILayout
 {
-    public static function Self(): static;
-
-    public static function Render(HtmlResponse $Context);
+    public function Render(ViewResponse $ViewResponse): void;
 }

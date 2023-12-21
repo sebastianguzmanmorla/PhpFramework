@@ -3,7 +3,6 @@
 namespace Views\Admin\Usuario;
 
 use Controllers\Admin\Usuario;
-use Model\Layout\HtmlResponse;
 use PhpFramework\Html\Enums\ButtonType;
 use PhpFramework\Html\Enums\Color;
 use PhpFramework\Html\Enums\FormMethod;
@@ -18,9 +17,10 @@ use PhpFramework\Html\FormSelect;
 use PhpFramework\Layout\Section\Filters;
 use PhpFramework\Layout\Section\Script;
 use PhpFramework\Layout\Section\Toolbar;
+use PhpFramework\Response\ViewResponse;
 
 #[Form(AutoComplete: false, Method: FormMethod::GET, Id: 'ListadoUsuario')]
-class Index extends HtmlResponse implements Filters, Script, Toolbar
+class Index extends ViewResponse implements Filters, Script, Toolbar
 {
     public FormInput $id_usuario;
 
@@ -47,7 +47,7 @@ class Index extends HtmlResponse implements Filters, Script, Toolbar
         return $this->FiltersOpen;
     }
 
-    public function Init(): void
+    public function Initialize(): void
     {
         $this->id_usuario = new FormInput(
             Label: 'ID',

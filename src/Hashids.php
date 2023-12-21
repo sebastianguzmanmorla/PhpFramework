@@ -10,7 +10,7 @@ class Hashids
 
     private static \Hashids\Hashids $Hashids;
 
-    public static function Init(#[SensitiveParameter] string $Salt): void
+    public static function Initialize(#[SensitiveParameter] string $Salt): void
     {
         static::$Hashids = new \Hashids\Hashids($Salt, 12);
     }

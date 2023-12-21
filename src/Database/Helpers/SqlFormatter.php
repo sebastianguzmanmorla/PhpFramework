@@ -641,7 +641,7 @@ class SqlFormatter
     /**
      * Stuff that only needs to be done once.  Builds regular expressions and sorts the reserved words.
      */
-    protected static function init(): void
+    protected static function Initialize(): void
     {
         if (self::$init) {
             return;
@@ -826,7 +826,7 @@ class SqlFormatter
      */
     protected static function tokenize($string)
     {
-        self::init();
+        self::Initialize();
 
         $tokens = [];
 

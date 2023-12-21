@@ -2,13 +2,14 @@
 
 namespace Views\Admin;
 
-use Model\Layout\HtmlResponse;
+use PhpFramework\Response\ViewResponse;
 
-class Index extends HtmlResponse
+class Index extends ViewResponse
 {
-    public function Init(): void
+    public function Initialize(): void
     {
-        $this->Title = 'Dashboard';
+        $this->Title = 'Inicio';
+        $this->Icon = 'fa fa-home';
     }
 
     public function Body(): void

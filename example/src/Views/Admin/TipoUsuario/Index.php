@@ -3,7 +3,6 @@
 namespace Views\Admin\TipoUsuario;
 
 use Controllers\Admin\TipoUsuario;
-use Model\Layout\HtmlResponse;
 use PhpFramework\Html\Enums\ButtonType;
 use PhpFramework\Html\Enums\Color;
 use PhpFramework\Html\Enums\FormMethod;
@@ -17,9 +16,10 @@ use PhpFramework\Html\FormModal;
 use PhpFramework\Layout\Section\Filters;
 use PhpFramework\Layout\Section\Script;
 use PhpFramework\Layout\Section\Toolbar;
+use PhpFramework\Response\ViewResponse;
 
 #[Form(AutoComplete: false, Method: FormMethod::GET, Id: 'ListadoTipoUsuario')]
-class Index extends HtmlResponse implements Filters, Script, Toolbar
+class Index extends ViewResponse implements Filters, Script, Toolbar
 {
     public FormInput $id_tipousuario;
 
@@ -38,7 +38,7 @@ class Index extends HtmlResponse implements Filters, Script, Toolbar
         return $this->FiltersOpen;
     }
 
-    public function Init(): void
+    public function Initialize(): void
     {
         $this->id_tipousuario = new FormInput(
             Label: 'ID',

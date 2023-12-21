@@ -2,12 +2,13 @@
 
 namespace Environment;
 
+use Model\Layout\HtmlResponse;
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Controller;
 use PhpFramework\Database\Connection\MySql;
 use PhpFramework\Hashids;
 use PhpFramework\Layout\Bootstrap\Admin as AdminBootstrap;
-use PhpFramework\Response\HtmlResponse;
+use PhpFramework\Layout\Bootstrap\Login as LoginBootstrap;
 use PhpFramework\Router;
 
 class Config
@@ -57,7 +58,7 @@ class Config
 
         session_start();
 
-        Hashids::Init(self::Current()->HashidsSalt);
+        Hashids::Initialize(self::Current()->HashidsSalt);
 
         $Database = \Database\Framework::Initialize(new MySql(
             Hostname: self::Current()->Hostname,
@@ -71,7 +72,11 @@ class Config
 
         Controller::AutoLoad(realpath('./Controllers'));
 
-        HtmlResponse::$DefaultLayout = new AdminBootstrap();
+        HtmlResponse::InitializeDefault(
+            Project: self::$Project,
+            Author: self::$Author,
+            Layout: isset($_SESSION['Usuario']) ? new AdminBootstrap() : new LoginBootstrap()
+        );
     }
 
     public static function Process(): ?string

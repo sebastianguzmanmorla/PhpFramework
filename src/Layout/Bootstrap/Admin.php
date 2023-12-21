@@ -6,7 +6,7 @@ use PhpFramework\Html\Components\Script as ComponentsScript;
 use PhpFramework\Html\Components\Stylesheet;
 use PhpFramework\Html\FormModal;
 use PhpFramework\Html\Markup;
-use PhpFramework\Layout\Layout;
+use PhpFramework\Layout\ILayout;
 use PhpFramework\Layout\Section\Brand;
 use PhpFramework\Layout\Section\Filters;
 use PhpFramework\Layout\Section\Menu;
@@ -14,13 +14,13 @@ use PhpFramework\Layout\Section\Navbar;
 use PhpFramework\Layout\Section\Script;
 use PhpFramework\Layout\Section\Toolbar;
 use PhpFramework\Layout\Section\User;
-use PhpFramework\Response\HtmlResponse;
+use PhpFramework\Response\ViewResponse;
 
-class Admin extends Layout
+class Admin implements ILayout
 {
-    public static function Render(HtmlResponse $Context): void
+    public function Render(ViewResponse $ViewResponse): void
     {
-        $Context->Stylesheets->Add(
+        $ViewResponse->Stylesheets->Add(
             new Stylesheet(
                 Href: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css',
                 Integrity: 'sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN'
@@ -43,7 +43,7 @@ class Admin extends Layout
             )
         );
 
-        $Context->Scripts->Add(
+        $ViewResponse->Scripts->Add(
             new ComponentsScript(
                 Src: 'https://code.jquery.com/jquery-3.7.1.min.js',
                 Integrity: 'sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo='
@@ -79,23 +79,23 @@ class Admin extends Layout
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?= new Markup(Dom: 'title', Content: $Context->Title) ?>
-<?= $Context->Stylesheets ?>
+<?= new Markup(Dom: 'title', Content: $ViewResponse->HtmlResponse->Project.($ViewResponse->HtmlResponse->Title !== null ? ' - '.$ViewResponse->HtmlResponse->Title : '')) ?>
+<?= $ViewResponse->Stylesheets ?>
 </head>
 <body>
 <div class="g-0">
 	<aside class="fixed-top offcanvas-md offcanvas-start text-bg-dark px-2 col-md-2" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
 		<div class="d-flex flex-column vh-100">
 			<div class="d-flex flex-row py-3 w-100">
-                <?= $Context instanceof Brand ? $Context->Brand() : null ?>
+                <?= $ViewResponse->HtmlResponse instanceof Brand ? $ViewResponse->HtmlResponse->Brand() : null ?>
 				<a class="btn btn-sm btn-dark d-md-none py-0 mx-0 align-self-center" role="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="true" aria-label="Toggle navigation">
 					<i class="fa fa-close fa-fw"></i>
 				</a>
 			</div>
 			<div class="mt-2 mb-auto overflow-auto">
-                <?= $Context instanceof Menu ? $Context->Menu() : null ?>
+                <?= $ViewResponse->HtmlResponse instanceof Menu ? $ViewResponse->HtmlResponse->Menu() : null ?>
 			</div>
-			<?= $Context instanceof User ? $Context->User() : null ?>
+			<?= $ViewResponse->HtmlResponse instanceof User ? $ViewResponse->HtmlResponse->User() : null ?>
 		</div>
 	</aside>
 	<header class="fixed-top navbar navbar-dark bg-dark p-0 offset-md-2 col-md-10">
@@ -108,42 +108,42 @@ class Admin extends Layout
 				</li>
 			</ul>
 			<div class="d-flex ms-auto">
-                <?= $Context instanceof Navbar ? $Context->Navbar() : null ?>
+                <?= $ViewResponse->HtmlResponse instanceof Navbar ? $ViewResponse->HtmlResponse->Navbar() : null ?>
 			</div>
 		</div>
 	</header>
 </div>
 <div class="row g-0 pt-5">
 	<main class="col col-md-10 ms-auto">
-        <?= $Context->Form?->Open() ?>
+        <?= $ViewResponse->Form?->Open() ?>
 		<div class="shadow sticky-top d-flex justify-content-between flex-wrap align-items-center text-primary bg-secondary-subtle py-2 px-3 border-bottom border-primary" style="top:54px;">
             <h5 class="card-title my-2">
                 <?= new Markup(
             Dom: 'span',
-            Content: $Context->Title,
-            Icon: $Context->Icon
+            Content: $ViewResponse->HtmlResponse->Title,
+            Icon: $ViewResponse->HtmlResponse->Icon
         ) ?>
             </h5>
             <div class="card-tools ms-auto my-1">
-                <?= $Context instanceof Toolbar ? $Context->Toolbar() : null ?>
+                <?= $ViewResponse instanceof Toolbar ? $ViewResponse->Toolbar() : null ?>
             </div>
 		</div>
 		<div class="container-fluid my-4">
-            <?= $Context->Alerts ?>
+            <?= $ViewResponse->Alerts ?>
 <?php
-        if ($Context instanceof Filters) {
+        if ($ViewResponse instanceof Filters) {
             ?>
             <div class="accordion shadow mb-3" id="Filtros">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button text-dark bg-secondary-subtle <?= $Context->FiltersOpen() ? '' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#FiltrosCollapse" aria-expanded="<?= $Context->FiltersOpen() ? 'true' : 'false' ?>" aria-controls="FiltrosCollapse">
+                        <button class="accordion-button text-dark bg-secondary-subtle <?= $ViewResponse->FiltersOpen() ? '' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#FiltrosCollapse" aria-expanded="<?= $ViewResponse->FiltersOpen() ? 'true' : 'false' ?>" aria-controls="FiltrosCollapse">
                             <i class="fa fa-filter"></i><h5 class="mx-3 my-0">Filtros</h5>
                         </button>
                     </h2>
-                    <div id="FiltrosCollapse" class="accordion-collapse collapse <?= $Context->FiltersOpen() ? 'show' : '' ?>" data-bs-parent="#Filtros">
+                    <div id="FiltrosCollapse" class="accordion-collapse collapse <?= $ViewResponse->FiltersOpen() ? 'show' : '' ?>" data-bs-parent="#Filtros">
                         <div class="accordion-body">
                             <div class="row row-cols-xxl-4 row-cols-lg-3 row-cols-1">
-                                <?= $Context->Filters() ?>
+                                <?= $ViewResponse->Filters() ?>
                             </div>
                         </div>
                     </div>
@@ -152,18 +152,18 @@ class Admin extends Layout
 <?php
         }
         ?>
-            <?= $Context->Body() ?>
-            <?= $Context->Form?->Close() ?>
+            <?= $ViewResponse->Body() ?>
+            <?= $ViewResponse->Form?->Close() ?>
 		</div>
 	</main>
 </div>
 <?php
-                foreach ($Context->Scripts() as $Script) {
+                foreach ($ViewResponse->Scripts() as $Script) {
                     echo $Script;
                 }
         ?>
 <?= FormModal::Script() ?>
-<?= $Context instanceof Script ? $Context->Script() : null ?>
+<?= $ViewResponse instanceof Script ? $ViewResponse->Script() : null ?>
 <script>
     $.blockUI.defaults.message = '<i class="fa fa-gear fa-spin-pulse fa-2xl"></i>';
     $.blockUI.defaults.css = {

@@ -16,14 +16,19 @@ use PhpFramework\Html\Markup;
 use PhpFramework\Layout\Section\Brand;
 use PhpFramework\Layout\Section\Menu;
 use PhpFramework\Layout\Section\User;
+use PhpFramework\Response\ViewResponse;
 use Request\PermisoUsuarioFilter;
 
-abstract class HtmlResponse extends \PhpFramework\Response\HtmlResponse implements Brand, Menu, User
+class HtmlResponse extends \PhpFramework\Response\HtmlResponse implements Brand, Menu, User
 {
-    public function Init(): void
+    public function Render(ViewResponse $ViewResponse): void
     {
-        $this->Project = Config::$Project;
-        $this->Author = Config::$Author;
+        if(PermisoUsuarioFilter::$Permiso !== null){
+            $this->Title ??= PermisoUsuarioFilter::$Permiso->per_nombre;
+            $this->Icon ??= PermisoUsuarioFilter::$Permiso->per_icon;
+        }
+
+        parent::Render($ViewResponse);
     }
 
     public function Brand(): string
