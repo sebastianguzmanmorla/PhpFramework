@@ -23,7 +23,7 @@ class HtmlResponse extends \PhpFramework\Response\HtmlResponse implements Brand,
 {
     public function Render(ViewResponse $ViewResponse): void
     {
-        if(PermisoUsuarioFilter::$Permiso !== null){
+        if (PermisoUsuarioFilter::$Permiso !== null) {
             $this->Title ??= PermisoUsuarioFilter::$Permiso->per_nombre;
             $this->Icon ??= PermisoUsuarioFilter::$Permiso->per_icon;
         }

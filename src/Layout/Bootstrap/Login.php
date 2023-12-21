@@ -45,7 +45,7 @@ class Login implements ILayout
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?= new Markup(Dom: 'title', Content: $ViewResponse->HtmlResponse->Project.' - '.$ViewResponse->HtmlResponse->Title) ?>
+<?= new Markup(Dom: 'title', Content: $ViewResponse->HtmlResponse->Project . ' - ' . $ViewResponse->HtmlResponse->Title) ?>
 <?= $ViewResponse->Stylesheets ?>
 </head>
 <body class="bg-dark">
