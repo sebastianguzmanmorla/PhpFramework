@@ -50,6 +50,7 @@ class PermisoUsuarioFilter implements IRequestFilter
         if ($permiso_rs->EOF()) {
             return new ErrorResponse(StatusCode::Unauthorized, 'No tiene permiso');
         }
+
         static::$Permiso = $permiso_rs->current();
 
         return null;

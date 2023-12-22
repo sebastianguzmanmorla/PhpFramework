@@ -5,13 +5,17 @@ namespace Controllers;
 use Database\Framework\TipoUsuario;
 use Database\Framework\Usuario;
 use DateTime;
+use Model\IndexRequest;
+use Model\IndexResponse;
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Controller;
+use PhpFramework\Hashids;
 use PhpFramework\Html\Components\Alert;
 use PhpFramework\Html\Enums\AlertType;
 use PhpFramework\Request\Method;
 use PhpFramework\Response\ErrorHtmlResponse;
 use PhpFramework\Response\IResponse;
+use PhpFramework\Response\JsonResponse;
 use PhpFramework\Response\RedirectResponse;
 use PhpFramework\Response\StatusCode;
 use PhpFramework\Route;
@@ -203,5 +207,24 @@ class Index extends Controller
         session_regenerate_id(true);
 
         return new RedirectResponse(fn (\Controllers\Index $x) => $x->Index());
+    }
+
+    /*
+      Example:
+      curl --location 'http://localhost/?route=RestExample&GetId=10&HashId=j1mlyqAyZWew' \
+      --header 'Content-Type: application/json' \
+      --data '{"Name": "asdf"}'
+     */
+    #[Route('RestExample', Method::POST)]
+    public function IndexPost(IndexRequest $Request): JsonResponse
+    {
+        $Response = new IndexResponse(
+            GetId: $Request->GetId,
+            GetIdHash: Hashids::Encode($Request->GetId),
+            Id: $Request->HashId,
+            Name: $Request->Name
+        );
+
+        return $Response;
     }
 }

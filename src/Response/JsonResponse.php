@@ -4,9 +4,7 @@ namespace PhpFramework\Response;
 
 class JsonResponse implements IResponse
 {
-    public StatusCode $StatusCode;
-
-    public array $Message = [];
+    private StatusCode $StatusCode = StatusCode::Ok;
 
     public function __construct(StatusCode $StatusCode = StatusCode::Ok)
     {
