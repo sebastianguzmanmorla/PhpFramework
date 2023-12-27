@@ -17,7 +17,7 @@ class IsValidEmail implements IValidationRule
         ?string $Helper = null,
         ?Field &$Field = null
     ) {
-        $this->NotValidMessage = $NotValidMessage ?? 'El Valor de ' . ($Field?->Label ?? 'Valor') . ' debe ser un email válido';
+        $this->NotValidMessage = $NotValidMessage ?? ($Field?->Label ?? $Field?->Field ?? 'El Valor') . ' debe ser un email válido';
         $this->Helper = $Helper;
     }
 

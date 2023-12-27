@@ -7,7 +7,7 @@ use PhpFramework\Response\Interface\IResponse;
 
 class Response implements IResponse
 {
-    private StatusCode $StatusCode = StatusCode::Ok;
+    protected StatusCode $StatusCode = StatusCode::Ok;
 
     public function __construct(StatusCode $StatusCode = StatusCode::Ok)
     {

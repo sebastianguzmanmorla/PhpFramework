@@ -17,7 +17,7 @@ class IsValidRut implements IValidationRule
         ?string $Helper = null,
         ?Field &$Field = null
     ) {
-        $this->NotValidMessage = $NotValidMessage ?? 'El Valor de ' . ($Field?->Label ?? 'Valor') . ' ingresado no es válido';
+        $this->NotValidMessage = $NotValidMessage ?? ($Field?->Label ?? $Field?->Field ?? 'El Rut') . ' ingresado no es válido';
         $this->Helper = $Helper;
     }
 

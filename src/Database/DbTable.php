@@ -5,8 +5,10 @@ namespace PhpFramework\Database;
 use ArrayAccess;
 use JsonSerializable;
 use PhpFramework\Database\Attributes\Table;
+use PhpFramework\Response\Enum\StatusCode;
+use PhpFramework\Response\Interface\IResponse;
 
-class DbTable extends Table implements ArrayAccess, JsonSerializable
+class DbTable extends Table implements ArrayAccess, IResponse, JsonSerializable
 {
     public function __isset(string $name): bool
     {
@@ -38,6 +40,14 @@ class DbTable extends Table implements ArrayAccess, JsonSerializable
             $Property = $this->ReflectionClass->getProperty($name);
             $Property->setValue($this, null);
         }
+    }
+
+    public function Response(): ?string
+    {
+        header('Content-Type: application/json');
+        http_response_code(StatusCode::Ok->value);
+
+        return json_encode($this);
     }
 
     public function jsonSerialize(): mixed

@@ -19,7 +19,7 @@ class Validate implements IValidationRule
         ?Field &$Field = null,
         public ?Closure $Validation = null
     ) {
-        $this->NotValidMessage = $NotValidMessage ?? 'El Valor de' . ($Field?->Label ?? 'Valor') . ' no es válido';
+        $this->NotValidMessage = $NotValidMessage ?? ($Field?->Label ?? $Field?->Field ?? 'El Valor') . ' no es válido';
         $this->Helper = $Helper;
     }
 

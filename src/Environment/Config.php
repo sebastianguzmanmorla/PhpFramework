@@ -7,7 +7,7 @@ use PhpFramework\Router;
 
 class Config
 {
-    public static Config $Current;
+    private static self $Current;
 
     public function __construct(
         public bool $Debug,
@@ -21,8 +21,21 @@ class Config
     ) {
     }
 
-    public static function Initialize(): void
+    public static function Current(): static
     {
+        return self::$Current;
+    }
+
+    public static function Initialize(?self $Config = null): void
+    {
+        self::$Current = $Config ?? match (getenv('APP_ENV') ?? 'prd') {
+            default => new self(
+                Debug: false,
+                HashidsSalt: getenv('HASHIDS_SALT'),
+                SessionName: 'framework'
+            )
+        };
+
         header_remove('X-Powered-By');
 
         if (getenv('APP_ENV') == 'local') {
@@ -34,19 +47,19 @@ class Config
             error_reporting(E_ALL);
         }
 
-        session_name(self::Environment()->SessionName);
+        session_name(self::$Current->SessionName);
 
         session_set_cookie_params(
-            self::Environment()->SessionLifetime,
-            self::Environment()->SessionPath,
-            self::Environment()->SessionDomain,
-            self::Environment()->SessionSecure,
-            self::Environment()->SessionHttpOnly
+            self::$Current->SessionLifetime,
+            self::$Current->SessionPath,
+            self::$Current->SessionDomain,
+            self::$Current->SessionSecure,
+            self::$Current->SessionHttpOnly
         );
 
         session_start();
 
-        Hashids::Initialize(self::Environment()->HashidsSalt);
+        Hashids::Initialize(self::$Current->HashidsSalt);
     }
 
     public static function Logout(): void
@@ -59,23 +72,5 @@ class Config
     public static function Process(): ?string
     {
         return Router::Process()->Response();
-    }
-
-    public static function Environment(?string $Environment = null): self
-    {
-        $Environment ??= getenv('APP_ENV') ?? 'prd';
-
-        return match ($Environment) {
-            'local' => new self(
-                Debug: true,
-                HashidsSalt: getenv('HASHIDS_SALT'),
-                SessionName: 'framework',
-            ),
-            default => new self(
-                Debug: false,
-                HashidsSalt: getenv('HASHIDS_SALT'),
-                SessionName: 'framework',
-            )
-        };
     }
 }

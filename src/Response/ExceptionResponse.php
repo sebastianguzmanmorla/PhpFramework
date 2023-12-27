@@ -11,7 +11,7 @@ class ExceptionResponse extends ErrorResponse
     public function __construct(StatusCode $StatusCode, Throwable $Exception)
     {
         $this->StatusCode = $StatusCode;
-        if (Config::Environment()->Debug) {
+        if (Config::Current()->Debug) {
             $this->Errors = [$Exception->getMessage(), ...$this->FormatTrace($Exception->getTrace())];
         } else {
             $this->Errors = [$Exception->getMessage()];
@@ -30,7 +30,7 @@ class ExceptionResponse extends ErrorResponse
                 $Value['class'] ?? '',
                 $Value['type'] ?? '',
                 $Value['function'] ?? 'unknown',
-                implode(', ', array_map(fn ($Value) => var_export($Value, true), $Value['args']))
+                !empty($Value['args']) ? (@json_encode($Value['args']) ?? '') : ''
             );
         }
 

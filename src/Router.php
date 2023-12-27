@@ -232,7 +232,6 @@ final class Router
 
             throw new Exception('Route not found: ' . self::XssClean((string) ($_GET[self::Route])), StatusCode::NotFound);
         } catch (Throwable $Exception) {
-            throw $Exception;
             $StatusCode = $Exception instanceof Exception ? $Exception->StatusCode : StatusCode::InternalServerError;
 
             return new ExceptionResponse($StatusCode, $Exception);

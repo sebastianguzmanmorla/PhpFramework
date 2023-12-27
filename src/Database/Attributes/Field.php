@@ -69,8 +69,12 @@ class Field
         }
         if ($this->IsUnique) {
             $this->ValidationRules[] = new Validate(
-                NotValidMessage: 'Ya existe un registro con este ' . ($this->Label ?? 'Valor'),
+                NotValidMessage: 'Ya existe un registro con este ' . ($this->Label ?? $this->Field),
                 Validation: function (mixed $value, ?DbTable $Context = null) {
+                    if ($value === null) {
+                        return true;
+                    }
+
                     $Set = $this->Table->DbSet()
                         ->WhereValue(new DbValue(
                             Field: $this,
@@ -86,7 +90,9 @@ class Field
                         ));
                     }
 
-                    if ($Context !== null) {
+                    $PrimaryKeyValue = $this->Table->GetPrimaryKey()->GetValue($Context);
+
+                    if ($Context !== null && $PrimaryKeyValue !== null) {
                         $Set = $Set->WhereValue(new DbValue(
                             Field: $this->Table->GetPrimaryKey(),
                             Where: DbWhere::NotEqual,

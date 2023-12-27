@@ -19,7 +19,7 @@ class IsBetween implements IValidationRule
         public int $Min,
         public int $Max
     ) {
-        $this->NotValidMessage = $NotValidMessage ?? 'El Valor de ' . ($Field?->Label ?? 'Valor') . " debe estar entre {$Min} y {$Max}";
+        $this->NotValidMessage = $NotValidMessage ?? ($Field?->Label ?? $Field?->Field ?? 'El Valor') . " debe estar entre {$Min} y {$Max}";
         $this->Helper = $Helper;
     }
 

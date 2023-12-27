@@ -19,7 +19,7 @@ class IsValidDecimal implements IValidationRule
         public int $NumericoMax = 8,
         public int $DecimalMax = 2
     ) {
-        $this->NotValidMessage = $NotValidMessage ?? 'El Valor de ' . ($Field?->Label ?? 'Valor') . ' no es un decimal válido';
+        $this->NotValidMessage = $NotValidMessage ?? ($Field?->Label ?? $Field?->Field ?? 'El Valor') . ' no es un decimal válido';
         $this->Helper = $Helper;
     }
 

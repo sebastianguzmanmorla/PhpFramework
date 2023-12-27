@@ -22,9 +22,9 @@ class IsLengthValid implements IValidationRule
         if ($Field != null) {
             $this->Min = $Field->MinLength ?? 0;
             $this->Max = $Field->MaxLength ?? 255;
-            $this->NotValidMessage = $NotValidMessage ?? 'El Valor de ' . ($Field?->Label ?? 'Valor') . " debe tener entre {$this->Min} y {$this->Max} caracteres";
+            $this->NotValidMessage = $NotValidMessage ?? ($Field->Label ?? $Field->Field ?? 'El Valor') . " debe tener entre {$this->Min} y {$this->Max} caracteres";
         } else {
-            $this->NotValidMessage = $NotValidMessage ?? "El Valor de Valor debe tener entre {$Min} y {$Max} caracteres";
+            $this->NotValidMessage = $NotValidMessage ?? "El Valor debe tener entre {$Min} y {$Max} caracteres";
         }
 
         $this->Helper = $Helper;
@@ -32,6 +32,6 @@ class IsLengthValid implements IValidationRule
 
     public function Validate(mixed $value, ?DbTable $Table = null): bool
     {
-        return strlen($value) >= $this->Min && strlen($value) <= $this->Max;
+        return $value !== null && strlen($value) >= $this->Min && strlen($value) <= $this->Max;
     }
 }

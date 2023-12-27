@@ -22,7 +22,7 @@ trait Request
         $ContentType ??= ContentType::ReadRequest();
 
         return match ($Method) {
-            Method::GET => $_GET,
+            Method::GET, Method::DELETE => $_GET,
             default => match ($ContentType) {
                 ContentType::FormData, ContentType::FormUrlEncoded => $_POST,
                 ContentType::Json => json_decode(file_get_contents('php://input'), true),

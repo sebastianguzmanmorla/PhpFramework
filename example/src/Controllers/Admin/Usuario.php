@@ -18,7 +18,7 @@ use PhpFramework\Html\Markup;
 use PhpFramework\Request\Enum\Method;
 use PhpFramework\Request\TableRequest;
 use PhpFramework\Response\Enum\StatusCode;
-use PhpFramework\Response\Html\ErrorResponse as ErrorHtmlResponse;
+use PhpFramework\Response\Html\ErrorResponse;
 use PhpFramework\Response\Interface\IResponse;
 use PhpFramework\Response\Json\TableResponse;
 use PhpFramework\Response\RedirectResponse;
@@ -172,7 +172,7 @@ class Usuario extends Controller
             ->Select();
 
         if ($Usuario_rs->EOF()) {
-            return new ErrorHtmlResponse(StatusCode::NotFound, 'Usuario no encontrado');
+            return new ErrorResponse(StatusCode::NotFound, 'Usuario no encontrado');
         }
 
         $View->Usuario = $Usuario_rs->current();
@@ -212,7 +212,7 @@ class Usuario extends Controller
         $Usuario_rs = $Usuario_set->Select();
 
         if ($Usuario_rs->EOF()) {
-            return new ErrorHtmlResponse(StatusCode::NotFound, 'Usuario no encontrado');
+            return new ErrorResponse(StatusCode::NotFound, 'Usuario no encontrado');
         }
 
         $View->Usuario = $Usuario_rs->current();
@@ -325,7 +325,7 @@ class Usuario extends Controller
             ->Select();
 
         if ($Usuario_rs->EOF()) {
-            return new ErrorHtmlResponse(StatusCode::NotFound, 'Usuario no encontrado');
+            return new ErrorResponse(StatusCode::NotFound, 'Usuario no encontrado');
         }
 
         $DbItem = $Usuario_rs->current();
@@ -351,7 +351,7 @@ class Usuario extends Controller
         $Usuario_rs = $Usuario_set->Select();
 
         if ($Usuario_rs->EOF()) {
-            return new ErrorHtmlResponse(StatusCode::NotFound, 'Usuario no encontrado');
+            return new ErrorResponse(StatusCode::NotFound, 'Usuario no encontrado');
         }
 
         $DbItem = $Usuario_rs->current();
@@ -385,7 +385,7 @@ class Usuario extends Controller
         $Usuario_rs = $Usuario_set->Select();
 
         if ($Usuario_rs->EOF()) {
-            return new ErrorHtmlResponse(StatusCode::NotFound, 'Usuario no encontrado');
+            return new ErrorResponse(StatusCode::NotFound, 'Usuario no encontrado');
         }
 
         $Usuario = new DbUsuario();

@@ -14,12 +14,9 @@ use PhpFramework\Html\Markup;
 use PhpFramework\Request\Enum\Method;
 use PhpFramework\Request\TableRequest;
 use PhpFramework\Response\Enum\StatusCode;
-use PhpFramework\Response\Html\ErrorResponse as ErrorHtmlResponse;
+use PhpFramework\Response\Html\ErrorResponse;
 use PhpFramework\Response\Interface\IResponse;
-use PhpFramework\Response\Json\ErrorResponse as ErrorJsonResponse;
-use PhpFramework\Response\Json\Response as JsonResponse;
 use PhpFramework\Response\Json\TableResponse;
-use PhpFramework\Response\Json\ValidationResponse as JsonValidationResponse;
 use PhpFramework\Response\RedirectResponse;
 use PhpFramework\Route;
 use Request\PermisoUsuarioFilter;
@@ -102,7 +99,7 @@ class TipoUsuario extends Controller
             ->Select();
 
         if ($TipoUsuario_rs->EOF()) {
-            return new ErrorHtmlResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
+            return new ErrorResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
         }
 
         $View->TipoUsuario = $TipoUsuario_rs->current();
@@ -122,7 +119,7 @@ class TipoUsuario extends Controller
         $TipoUsuario_rs = $TipoUsuario_set->Select();
 
         if ($TipoUsuario_rs->EOF()) {
-            return new ErrorHtmlResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
+            return new ErrorResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
         }
 
         $View = new \Views\Admin\TipoUsuario\Editar();
@@ -176,7 +173,7 @@ class TipoUsuario extends Controller
         $TipoUsuario_rs = $TipoUsuario_set->Select();
 
         if ($TipoUsuario_rs->EOF()) {
-            return new ErrorHtmlResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
+            return new ErrorResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
         }
 
         $TipoUsuario = new DbTipoUsuario();
@@ -185,30 +182,5 @@ class TipoUsuario extends Controller
         $TipoUsuario_set->Update($TipoUsuario);
 
         return new RedirectResponse(fn (TipoUsuario $x) => $x->Index());
-    }
-
-    // Api RESTful example
-    #[Route('api/TipoUsuario', Method::PUT)]
-    public function Put(
-        DbTipoUsuario $Request
-    ): JsonResponse {
-        $TipoUsuario_set = $this->Database->TipoUsuario
-            ->Where(fn (DbTipoUsuario $x) => $x->id_tipousuario == $Request->id_tipousuario && $x->tus_estado == 1);
-
-        $TipoUsuario_rs = $TipoUsuario_set->Select();
-
-        if ($TipoUsuario_rs->EOF()) {
-            return new ErrorJsonResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
-        }
-
-        $Response = new JsonValidationResponse();
-
-        if (!$Response->Validate($Request)) {
-            return $Response;
-        }
-
-        $TipoUsuario_set->Update($Request);
-
-        return new JsonResponse(StatusCode::Ok);
     }
 }

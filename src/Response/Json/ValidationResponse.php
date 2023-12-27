@@ -2,7 +2,10 @@
 
 namespace PhpFramework\Response\Json;
 
-use PhpFramework\Database\Attributes\Field;
+use Exception;
+use PhpFramework\Database\DbSchema;
+use PhpFramework\Database\DbTable;
+use PhpFramework\Response\Enum\StatusCode;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -10,30 +13,56 @@ class ValidationResponse extends Response
 {
     public array $Errors = [];
 
-    final public function Validate(mixed $Context): bool
+    final public function Validate(mixed $Context, ?DbSchema $Database = null, $IgnorePrimaryKey = false): bool
     {
         $Valid = true;
 
         $Reflection = new ReflectionClass($Context::class);
 
-        $Reference = null;
+        if ($Context instanceof DbTable) {
+            if ($Database === null) {
+                throw new Exception('Database Instance is required');
+            }
 
-        foreach ($Reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $Property) {
-            $Value = $Property->getValue($Context);
+            $Table = $Database->TableByClass($Context::class);
 
-            $Field = $Property->getAttributes(Field::class);
-            $Field = !empty($Field) ? $Field[0]->newInstance() : null;
+            foreach ($Table->Fields() as $Field) {
+                $Value = $Field->GetValue($Context);
 
-            if ($Field !== null && !empty($Field->ValidationRules)) {
+                if ($Value === null && $Field->Default !== null) {
+                    $Field->SetValue($Context, $Field->Default);
+                    $Value = $Field->Default;
+                }
+
+                if ($IgnorePrimaryKey && $Field->PrimaryKey) {
+                    $Field->SetValue($Context, null);
+
+                    continue;
+                }
+
+                if (!$IgnorePrimaryKey && $Field->PrimaryKey && $Value === null) {
+                    $this->Errors[$Field->Field][] = ($Field?->Label ?? $Field?->Field ?? 'El Valor') . ' no puede ser nulo';
+
+                    $Valid = false;
+
+                    continue;
+                }
+
                 foreach ($Field->ValidationRules as $Rule) {
                     if (!$Rule->Validate($Value, $Context)) {
-                        $this->Errors[$Property->getName()] = $Rule->NotValidMessage;
+                        $this->Errors[$Field->Field][] = $Rule->NotValidMessage;
 
                         $Valid = false;
                     }
                 }
             }
+        } else {
+            foreach ($Reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $Property) {
+                $Value = $Property->getValue($Context);
+            }
         }
+
+        $this->StatusCode = $Valid ? StatusCode::Ok : StatusCode::BadRequest;
 
         return $Valid;
     }

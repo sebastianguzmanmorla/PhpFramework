@@ -5,11 +5,13 @@ namespace PhpFramework\Database;
 use ArrayAccess;
 use Exception;
 use JsonSerializable;
+use PhpFramework\Response\Enum\StatusCode;
+use PhpFramework\Response\Interface\IResponse;
 use ReflectionClass;
 use ReflectionObject;
 use stdClass;
 
-class DbItem extends stdClass implements ArrayAccess, JsonSerializable
+class DbItem extends stdClass implements ArrayAccess, IResponse, JsonSerializable
 {
     public function __isset(string $name): bool
     {
@@ -90,6 +92,14 @@ class DbItem extends stdClass implements ArrayAccess, JsonSerializable
                 }
             }
         }
+    }
+
+    public function Response(): ?string
+    {
+        header('Content-Type: application/json');
+        http_response_code(StatusCode::Ok->value);
+
+        return json_encode($this);
     }
 
     public function jsonSerialize(): mixed

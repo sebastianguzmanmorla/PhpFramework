@@ -17,7 +17,7 @@ class IsNotNull implements IValidationRule
         ?string $Helper = null,
         ?Field &$Field = null
     ) {
-        $this->NotValidMessage = $NotValidMessage ?? 'El Valor de ' . ($Field?->Label ?? 'Valor') . ' no puede ser nulo';
+        $this->NotValidMessage = $NotValidMessage ?? ($Field?->Label ?? $Field?->Field ?? 'El Valor') . ' no puede ser nulo';
         $this->Helper = $Helper;
     }
 

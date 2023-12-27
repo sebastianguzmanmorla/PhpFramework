@@ -43,16 +43,29 @@ class Config extends FrameworkConfig
         );
     }
 
-    public static function Initialize(): void
+    public static function Initialize(?FrameworkConfig $Config = null): void
     {
-        parent::Initialize();
+        parent::Initialize($Config ?? match (getenv('APP_ENV') ?? 'prd') {
+            'local' => new Localhost(),
+            'dev' => new Development(),
+            default => new static(
+                Hostname: getenv('DATABASE_HOST'),
+                Port: (int) getenv('DATABASE_PORT'),
+                Username: getenv('DATABASE_USER'),
+                Password: getenv('DATABASE_PASSWORD'),
+                Database: getenv('DATABASE_DATABASE'),
+                Debug: false,
+                HashidsSalt: getenv('HASHIDS_SALT'),
+                SessionName: 'framework-example'
+            )
+        });
 
         $Database = \Database\Framework::Initialize(new MySql(
-            Hostname: self::Environment()->Hostname,
-            Port: self::Environment()->Port,
-            Username: self::Environment()->Username,
-            Password: self::Environment()->Password,
-            Database: self::Environment()->Database
+            Hostname: static::Current()->Hostname,
+            Port: static::Current()->Port,
+            Username: static::Current()->Username,
+            Password: static::Current()->Password,
+            Database: static::Current()->Database
         ));
 
         Singleton::Add($Database);
@@ -64,25 +77,5 @@ class Config extends FrameworkConfig
             Author: self::$Author,
             Layout: isset($_SESSION['Usuario']) ? new AdminBootstrap() : new LoginBootstrap()
         );
-    }
-
-    public static function Environment(?string $Environment = null): self
-    {
-        $Environment ??= getenv('APP_ENV') ?? 'prd';
-
-        return match ($Environment) {
-            'local' => new Localhost(),
-            'dev' => new Development(),
-            default => new self(
-                Hostname: getenv('DATABASE_HOST'),
-                Port: (int) getenv('DATABASE_PORT'),
-                Username: getenv('DATABASE_USER'),
-                Password: getenv('DATABASE_PASSWORD'),
-                Database: getenv('DATABASE_DATABASE'),
-                Debug: false,
-                HashidsSalt: getenv('HASHIDS_SALT'),
-                SessionName: 'framework-example'
-            )
-        };
     }
 }
