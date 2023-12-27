@@ -1,6 +1,6 @@
 <?php
 
-namespace PhpFramework\Response;
+namespace PhpFramework\Response\Html;
 
 use Closure;
 use Generator;
@@ -13,12 +13,14 @@ use PhpFramework\Html\FormModal;
 use PhpFramework\Html\Markup;
 use PhpFramework\Html\Validation\IValidation;
 use PhpFramework\Layout\UseLayout;
+use PhpFramework\Response\Enum\StatusCode;
+use PhpFramework\Response\Interface\IResponse;
 use ReflectionClass;
 use ReflectionNamedType;
 
 abstract class ViewResponse implements IResponse
 {
-    public HtmlResponse $HtmlResponse;
+    public Response $Response;
 
     public ?string $Title;
 
@@ -36,14 +38,14 @@ abstract class ViewResponse implements IResponse
 
     public function __construct()
     {
-        $this->HtmlResponse = HtmlResponse::Instance();
+        $this->Response = Response::Instance();
 
-        $this->Title = &$this->HtmlResponse->Title;
-        $this->Icon = &$this->HtmlResponse->Icon;
+        $this->Title = &$this->Response->Title;
+        $this->Icon = &$this->Response->Icon;
 
-        $this->Stylesheets = &$this->HtmlResponse->Stylesheets;
-        $this->Scripts = &$this->HtmlResponse->Scripts;
-        $this->Alerts = &$this->HtmlResponse->Alerts;
+        $this->Stylesheets = &$this->Response->Stylesheets;
+        $this->Scripts = &$this->Response->Scripts;
+        $this->Alerts = &$this->Response->Alerts;
 
         $ReflectionClass = new ReflectionClass(static::class);
 
@@ -53,7 +55,7 @@ abstract class ViewResponse implements IResponse
         $UseLayout = $ReflectionClass->getAttributes(UseLayout::class);
 
         if (!empty($UseLayout)) {
-            HtmlResponse::Instance()->Layout = $UseLayout[0]->newInstance()->Layout;
+            Response::Instance()->Layout = $UseLayout[0]->newInstance()->Layout;
         }
 
         foreach ($ReflectionClass->getProperties() as $Property) {
@@ -87,7 +89,7 @@ abstract class ViewResponse implements IResponse
         header('Content-Type: text/html; charset=utf-8');
 
         ob_start();
-        HtmlResponse::Instance()->Render($this);
+        Response::Instance()->Render($this);
         $Body = ob_get_contents();
         ob_end_clean();
 
@@ -96,7 +98,7 @@ abstract class ViewResponse implements IResponse
 
     final public function Scripts(): Generator
     {
-        yield $this->HtmlResponse->Scripts;
+        yield $this->Response->Scripts;
         $Reflection = new ReflectionClass($this);
         foreach ($Reflection->getProperties() as $Property) {
             $PropertyType = $Property->getType();

@@ -8,10 +8,10 @@ use Database\Framework\PermisoUsuario;
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Database\Enumerations\DbWhere;
 use PhpFramework\Request\IRequestFilter;
+use PhpFramework\Response\Enum\StatusCode;
 use PhpFramework\Response\ErrorResponse;
-use PhpFramework\Response\IResponse;
+use PhpFramework\Response\Interface\IResponse;
 use PhpFramework\Response\RedirectResponse;
-use PhpFramework\Response\StatusCode;
 use PhpFramework\Router;
 
 #[Attribute(Attribute::TARGET_METHOD)]

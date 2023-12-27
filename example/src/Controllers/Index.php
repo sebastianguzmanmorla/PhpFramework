@@ -5,6 +5,7 @@ namespace Controllers;
 use Database\Framework\TipoUsuario;
 use Database\Framework\Usuario;
 use DateTime;
+use Environment\Config;
 use Model\IndexRequest;
 use Model\IndexResponse;
 use PhpFramework\Attributes\Singleton;
@@ -12,12 +13,12 @@ use PhpFramework\Controller;
 use PhpFramework\Hashids;
 use PhpFramework\Html\Components\Alert;
 use PhpFramework\Html\Enums\AlertType;
-use PhpFramework\Request\Method;
-use PhpFramework\Response\ErrorHtmlResponse;
-use PhpFramework\Response\IResponse;
-use PhpFramework\Response\JsonResponse;
+use PhpFramework\Request\Enum\Method;
+use PhpFramework\Response\Enum\StatusCode;
+use PhpFramework\Response\Html\ErrorResponse as ErrorHtmlResponse;
+use PhpFramework\Response\Interface\IResponse;
+use PhpFramework\Response\Json\Response as JsonResponse;
 use PhpFramework\Response\RedirectResponse;
-use PhpFramework\Response\StatusCode;
 use PhpFramework\Route;
 use SensitiveParameter;
 
@@ -202,9 +203,7 @@ class Index extends Controller
     #[Route('Logout')]
     public function Logout(): RedirectResponse
     {
-        session_destroy();
-        session_start();
-        session_regenerate_id(true);
+        Config::Logout();
 
         return new RedirectResponse(fn (\Controllers\Index $x) => $x->Index());
     }

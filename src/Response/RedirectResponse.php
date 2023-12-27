@@ -2,6 +2,7 @@
 
 namespace PhpFramework\Response;
 
+use PhpFramework\Response\Interface\IResponse;
 use PhpFramework\Url;
 
 class RedirectResponse extends Url implements IResponse

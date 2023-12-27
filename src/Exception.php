@@ -2,7 +2,7 @@
 
 namespace PhpFramework;
 
-use PhpFramework\Response\StatusCode;
+use PhpFramework\Response\Enum\StatusCode;
 use Throwable;
 
 class Exception extends \Exception

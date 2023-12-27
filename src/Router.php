@@ -7,16 +7,21 @@ use PhpFramework\Attributes\Hashid;
 use PhpFramework\Attributes\Parameter;
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Request\IRequestFilter;
-use PhpFramework\Response\ErrorJsonResponse;
+use PhpFramework\Request\Trait\Request as TraitRequest;
+use PhpFramework\Response\Enum\StatusCode;
 use PhpFramework\Response\ExceptionResponse;
-use PhpFramework\Response\IResponse;
-use PhpFramework\Response\JsonResponse;
-use PhpFramework\Response\StatusCode;
+use PhpFramework\Response\Interface\IResponse;
+use ReflectionAttribute;
 use ReflectionClass;
+use ReflectionNamedType;
+use ReflectionProperty;
+use ReflectionUnionType;
 use Throwable;
 
-class Router
+final class Router
 {
+    use TraitRequest;
+
     public const Route = 'route';
     public const Controller = '0';
     public const Method = '1';
@@ -27,13 +32,113 @@ class Router
     {
         if (is_array($Input)) {
             foreach ($Input as $Key => $Value) {
-                $Input[$Key] = static::XssClean($Value);
+                $Input[$Key] = self::XssClean($Value);
             }
         } else {
             $Input = htmlspecialchars($Input);
         }
 
         return $Input;
+    }
+
+    public static function RequestProcess(
+        Parameter $Parameter,
+        mixed &$Context,
+        ?ReflectionNamedType $Type = null
+    ): void {
+        if ($Type !== null) {
+            $Value = $Parameter->Value();
+
+            if ($Value !== null) {
+                switch ($Type->getName()) {
+                    case 'int':
+                        $Value = (int) $Value;
+
+                        break;
+                    case 'float':
+                        $Value = (float) $Value;
+
+                        break;
+                    case 'bool':
+                        $Value = (bool) $Value;
+
+                        break;
+                    case 'array':
+                        $Value = self::XssClean($Value);
+
+                        break;
+                    case 'string':
+                        $Value = self::XssClean((string) $Value);
+
+                        break;
+                    case 'DateTime':
+                        $Value = new DateTime($Value);
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            $Context = $Value;
+        } else {
+            $ReflectionClass = new ReflectionClass($Context::class);
+
+            foreach ($ReflectionClass->getProperties(ReflectionProperty::IS_PUBLIC) as $Property) {
+                $PropertyType = $Property->getType();
+
+                if ($PropertyType instanceof ReflectionUnionType) {
+                    foreach ($PropertyType->getTypes() as $Type) {
+                        if ($Type->isBuiltin()) {
+                            $PropertyType = $Type;
+
+                            break;
+                        }
+                    }
+                }
+
+                $PropertyParameter = $Property->getAttributes(Parameter::class, ReflectionAttribute::IS_INSTANCEOF);
+
+                $PropertyParameter = !empty($PropertyParameter) ? $PropertyParameter[0]->newInstance() : new Parameter(
+                    Name: $Property->getName()
+                );
+
+                $Value = $PropertyParameter->Value();
+
+                if ($Value !== null) {
+                    switch ($PropertyType->getName()) {
+                        case 'int':
+                            $Value = (int) $Value;
+
+                            break;
+                        case 'float':
+                            $Value = (float) $Value;
+
+                            break;
+                        case 'bool':
+                            $Value = (bool) $Value;
+
+                            break;
+                        case 'array':
+                            $Value = self::XssClean($Value);
+
+                            break;
+                        case 'string':
+                            $Value = self::XssClean((string) $Value);
+
+                            break;
+                        case 'DateTime':
+                            $Value = new DateTime($Value);
+
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                $Property->setValue($Context, $Value);
+            }
+        }
     }
 
     public static function Process(): IResponse
@@ -48,8 +153,8 @@ class Router
                 $_SERVER['REQUEST_METHOD'] = Route::$DefaultMethod;
             }
 
-            if (isset(static::$Routes[$_GET[self::Route]][$_SERVER['REQUEST_METHOD']])) {
-                $Route = static::$Routes[$_GET[self::Route]][$_SERVER['REQUEST_METHOD']];
+            if (isset(self::$Routes[$_GET[self::Route]][$_SERVER['REQUEST_METHOD']])) {
+                $Route = self::$Routes[$_GET[self::Route]][$_SERVER['REQUEST_METHOD']];
 
                 foreach ($Route[self::Method]->getAttributes() as $Attribute) {
                     $Class = new ReflectionClass($Attribute->getName());
@@ -87,106 +192,48 @@ class Router
                 $Hashids = isset($_GET[Hashids::IdParameter]) ? Hashids::Decode($_GET[Hashids::IdParameter]) : [];
 
                 foreach ($Route[self::Method]->GetParameters() as $RouteParameter) {
+                    $Parameter = $RouteParameter->getAttributes(Parameter::class, ReflectionAttribute::IS_INSTANCEOF);
+
+                    $Parameter = !empty($Parameter) ? $Parameter[0]->newInstance() : new Parameter(
+                        Name: $RouteParameter->getName()
+                    );
+
                     $RouteParameterType = $RouteParameter->getType();
 
+                    $RouteParameterValue = null;
+
                     if (!$RouteParameterType->isBuiltin() && $RouteParameterType->getName() != 'DateTime') {
-                        $Value = isset($_GET[$RouteParameter->getName()]) ? $_GET[$RouteParameter->getName()] : file_get_contents('php://input');
-
                         $RouteParameterClass = new ReflectionClass($RouteParameterType->getName());
-                        $RouteParameters[$RouteParameter->getName()] = $RouteParameterClass->newInstance($Value);
+                        $RouteParameterValue = $RouteParameterClass->newInstance();
+
+                        self::RequestProcess(
+                            $Parameter,
+                            $RouteParameterValue,
+                        );
+
+                        $RouteParameters[$RouteParameter->getName()] = $RouteParameterValue;
                     } else {
-                        $RouteMethod = $_SERVER['REQUEST_METHOD'];
-
-                        $RouteParameterAttributes = $RouteParameter->getAttributes(Parameter::class);
-
-                        if (isset($RouteParameterAttributes[0])) {
-                            $RouteMethod = $RouteParameterAttributes[0]->newInstance()->Method->value;
-                        }
-
-                        $HashidAttributes = $RouteParameter->getAttributes(Hashid::class);
-
-                        if (isset($HashidAttributes[0])) {
-                            $RouteMethod = $HashidAttributes[0]->newInstance()->Method->value;
-                        }
-
-                        $Value = null;
-
-                        switch ($RouteMethod) {
-                            case 'GET':
-                                $Value = isset($_GET[$RouteParameter->getName()]) ? $_GET[$RouteParameter->getName()] : null;
-
-                                break;
-                            case 'POST':
-                                $Value = isset($_POST[$RouteParameter->getName()]) ? $_POST[$RouteParameter->getName()] : null;
-
-                                break;
-                            default:
-                                break;
-                        }
-
-                        $RouteParameters[$RouteParameter->getName()] = null;
-
-                        if (!empty($HashidAttributes) && $RouteMethod == 'GET' && $Value === null) {
-                            $RouteParameters[$RouteParameter->getName()] = array_shift($Hashids) ?? null;
-
-                            continue;
-                        }
-
-                        if (!empty($HashidAttributes) && $Value !== null) {
-                            $RouteParameters[$RouteParameter->getName()] = Hashids::Decode($Value)[0];
-
-                            continue;
-                        }
-
-                        if ($Value !== null && $Value !== '') {
-                            switch ($RouteParameterType->getName()) {
-                                case 'int':
-                                    $RouteParameters[$RouteParameter->getName()] = (int) $Value;
-
-                                    break;
-                                case 'float':
-                                    $RouteParameters[$RouteParameter->getName()] = (float) $Value;
-
-                                    break;
-                                case 'bool':
-                                    $RouteParameters[$RouteParameter->getName()] = (bool) $Value;
-
-                                    break;
-                                case 'array':
-                                    $RouteParameters[$RouteParameter->getName()] = static::XssClean($Value);
-
-                                    break;
-                                case 'string':
-                                    $RouteParameters[$RouteParameter->getName()] = static::XssClean((string) $Value);
-
-                                    break;
-                                case 'DateTime':
-                                    $RouteParameters[$RouteParameter->getName()] = new DateTime($Value);
-
-                                    break;
-                                default:
-                                    $RouteParameters[$RouteParameter->getName()] = $Value;
-
-                                    break;
-                            }
+                        if ($Parameter instanceof Hashid && $Parameter->Name === null) {
+                            $RouteParameterValue = array_shift($Hashids);
+                        } else {
+                            self::RequestProcess(
+                                $Parameter,
+                                $RouteParameterValue,
+                                $RouteParameterType
+                            );
                         }
                     }
+
+                    $RouteParameters[$RouteParameter->getName()] = $RouteParameterValue;
                 }
 
                 return $Route[self::Method]->invoke($Controller, ...$RouteParameters);
             }
 
-            throw new Exception('Route not found: ' . static::XssClean((string) ($_GET[self::Route])), StatusCode::NotFound);
+            throw new Exception('Route not found: ' . self::XssClean((string) ($_GET[self::Route])), StatusCode::NotFound);
         } catch (Throwable $Exception) {
+            throw $Exception;
             $StatusCode = $Exception instanceof Exception ? $Exception->StatusCode : StatusCode::InternalServerError;
-
-            if ($Route !== null) {
-                $RouteName = $Route[self::Method]->getreturnType()->getName();
-                $RouteParameterClass = new ReflectionClass($RouteName);
-                if ($RouteParameterClass->isSubclassOf(JsonResponse::class) || $RouteName == JsonResponse::class) {
-                    return new ErrorJsonResponse($StatusCode, $Exception->getMessage());
-                }
-            }
 
             return new ExceptionResponse($StatusCode, $Exception);
         }

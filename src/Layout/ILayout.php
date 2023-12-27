@@ -2,7 +2,7 @@
 
 namespace PhpFramework\Layout;
 
-use PhpFramework\Response\ViewResponse;
+use PhpFramework\Response\Html\ViewResponse;
 
 interface ILayout
 {

@@ -1,11 +1,12 @@
 <?php
 
-namespace PhpFramework\Response;
+namespace PhpFramework\Response\Html;
 
 use PhpFramework\Html\Components\Alert;
 use PhpFramework\Html\Enums\AlertType;
+use PhpFramework\Response\Enum\StatusCode;
 
-class ErrorHtmlResponse extends ViewResponse
+class ErrorResponse extends ViewResponse
 {
     public array $Errors;
 

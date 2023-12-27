@@ -1,11 +1,12 @@
 <?php
 
-namespace PhpFramework\Response;
+namespace PhpFramework\Response\Json;
 
 use PhpFramework\Database\DbResourceSet;
 use PhpFramework\Request\TableRequest;
+use PhpFramework\Response\Enum\StatusCode;
 
-class TableResponse extends JsonResponse
+class TableResponse extends Response
 {
     public int $recordsTotal;
 

@@ -14,7 +14,7 @@ use PhpFramework\Layout\Section\Navbar;
 use PhpFramework\Layout\Section\Script;
 use PhpFramework\Layout\Section\Toolbar;
 use PhpFramework\Layout\Section\User;
-use PhpFramework\Response\ViewResponse;
+use PhpFramework\Response\Html\ViewResponse;
 
 class Admin implements ILayout
 {
@@ -79,7 +79,7 @@ class Admin implements ILayout
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?= new Markup(Dom: 'title', Content: $ViewResponse->HtmlResponse->Project . ($ViewResponse->HtmlResponse->Title !== null ? ' - ' . $ViewResponse->HtmlResponse->Title : '')) ?>
+<?= new Markup(Dom: 'title', Content: $ViewResponse->Response->Project . ($ViewResponse->Response->Title !== null ? ' - ' . $ViewResponse->Response->Title : '')) ?>
 <?= $ViewResponse->Stylesheets ?>
 </head>
 <body>
@@ -87,15 +87,15 @@ class Admin implements ILayout
 	<aside class="fixed-top offcanvas-md offcanvas-start text-bg-dark px-2 col-md-2" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
 		<div class="d-flex flex-column vh-100">
 			<div class="d-flex flex-row py-3 w-100">
-                <?= $ViewResponse->HtmlResponse instanceof Brand ? $ViewResponse->HtmlResponse->Brand() : null ?>
+                <?= $ViewResponse->Response instanceof Brand ? $ViewResponse->Response->Brand() : null ?>
 				<a class="btn btn-sm btn-dark d-md-none py-0 mx-0 align-self-center" role="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="true" aria-label="Toggle navigation">
 					<i class="fa fa-close fa-fw"></i>
 				</a>
 			</div>
 			<div class="mt-2 mb-auto overflow-auto">
-                <?= $ViewResponse->HtmlResponse instanceof Menu ? $ViewResponse->HtmlResponse->Menu() : null ?>
+                <?= $ViewResponse->Response instanceof Menu ? $ViewResponse->Response->Menu() : null ?>
 			</div>
-			<?= $ViewResponse->HtmlResponse instanceof User ? $ViewResponse->HtmlResponse->User() : null ?>
+			<?= $ViewResponse->Response instanceof User ? $ViewResponse->Response->User() : null ?>
 		</div>
 	</aside>
 	<header class="fixed-top navbar navbar-dark bg-dark p-0 offset-md-2 col-md-10">
@@ -108,7 +108,7 @@ class Admin implements ILayout
 				</li>
 			</ul>
 			<div class="d-flex ms-auto">
-                <?= $ViewResponse->HtmlResponse instanceof Navbar ? $ViewResponse->HtmlResponse->Navbar() : null ?>
+                <?= $ViewResponse->Response instanceof Navbar ? $ViewResponse->Response->Navbar() : null ?>
 			</div>
 		</div>
 	</header>
@@ -120,8 +120,8 @@ class Admin implements ILayout
             <h5 class="card-title my-2">
                 <?= new Markup(
             Dom: 'span',
-            Content: $ViewResponse->HtmlResponse->Title,
-            Icon: $ViewResponse->HtmlResponse->Icon
+            Content: $ViewResponse->Response->Title,
+            Icon: $ViewResponse->Response->Icon
         ) ?>
             </h5>
             <div class="card-tools ms-auto my-1">

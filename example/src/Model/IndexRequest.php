@@ -4,15 +4,14 @@ namespace Model;
 
 use PhpFramework\Attributes\Hashid;
 use PhpFramework\Attributes\Parameter;
-use PhpFramework\Request\JsonRequest;
-use PhpFramework\Request\Method;
+use PhpFramework\Request\Enum\Method;
 
-class IndexRequest extends JsonRequest
+class IndexRequest
 {
-    #[Parameter(Method::GET)]
+    #[Parameter(Name: 'GetId', Method: Method::GET)]
     public int $GetId;
 
-    #[Hashid(Method::GET)]
+    #[Hashid(Name: 'HashId', Method: Method::GET)]
     public int $HashId;
 
     public ?string $Name;

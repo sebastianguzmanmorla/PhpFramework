@@ -2,9 +2,9 @@
 
 namespace Model;
 
-use PhpFramework\Response\JsonResponse;
+use PhpFramework\Response\Json\Response;
 
-class IndexResponse extends JsonResponse
+class IndexResponse extends Response
 {
     public function __construct(
         public ?int $GetId = null,

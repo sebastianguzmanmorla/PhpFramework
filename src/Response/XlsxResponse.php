@@ -4,6 +4,8 @@ namespace PhpFramework\Response;
 
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Html\Markup;
+use PhpFramework\Response\Enum\StatusCode;
+use PhpFramework\Response\Interface\IResponse;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use ReflectionClass;
 use Throwable;

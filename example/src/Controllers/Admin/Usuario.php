@@ -15,13 +15,13 @@ use PhpFramework\Html\Enums\Color;
 use PhpFramework\Html\FormLink;
 use PhpFramework\Html\FormSelectOption;
 use PhpFramework\Html\Markup;
-use PhpFramework\Request\Method;
+use PhpFramework\Request\Enum\Method;
 use PhpFramework\Request\TableRequest;
-use PhpFramework\Response\ErrorHtmlResponse;
-use PhpFramework\Response\IResponse;
+use PhpFramework\Response\Enum\StatusCode;
+use PhpFramework\Response\Html\ErrorResponse as ErrorHtmlResponse;
+use PhpFramework\Response\Interface\IResponse;
+use PhpFramework\Response\Json\TableResponse;
 use PhpFramework\Response\RedirectResponse;
-use PhpFramework\Response\StatusCode;
-use PhpFramework\Response\TableResponse;
 use PhpFramework\Route;
 use Request\PermisoUsuarioFilter;
 
@@ -162,7 +162,7 @@ class Usuario extends Controller
 
     #[Route('Admin/Usuario/Editar'), PermisoUsuarioFilter]
     public function Editar(
-        #[Hashid(Method::GET)]
+        #[Hashid(Method: Method::GET)]
         int $id_usuario,
     ): \Views\Admin\Usuario\Editar {
         $View = new \Views\Admin\Usuario\Editar();
@@ -195,7 +195,7 @@ class Usuario extends Controller
 
     #[Route('Admin/Usuario/Editar', Method: Method::POST), PermisoUsuarioFilter]
     public function EditarPost(
-        #[Hashid(Method::GET)]
+        #[Hashid(Method: Method::GET)]
         int $id_usuario,
         ?int $id_tipousuario = null,
         ?string $usu_rut = null,
@@ -314,7 +314,7 @@ class Usuario extends Controller
 
     #[Route('Admin/Usuario/ModificarPassword'), PermisoUsuarioFilter]
     public function ModificarPassword(
-        #[Hashid(Method::GET)]
+        #[Hashid(Method: Method::GET)]
         int $id_usuario,
     ): IResponse {
         $View = new \Views\ModificarPassword();
@@ -338,7 +338,7 @@ class Usuario extends Controller
 
     #[Route('Admin/Usuario/ModificarPassword', Method::POST), PermisoUsuarioFilter]
     public function ModificarPasswordPost(
-        #[Hashid(Method::GET)]
+        #[Hashid(Method: Method::GET)]
         int $id_usuario,
         ?string $usu_pass = null
     ): IResponse {
@@ -376,7 +376,7 @@ class Usuario extends Controller
 
     #[Route('Admin/Usuario/Borrar', Method: Method::POST), PermisoUsuarioFilter]
     public function Borrar(
-        #[Hashid(Method::GET)]
+        #[Hashid(Method: Method::GET)]
         int $id_usuario
     ): IResponse {
         $Usuario_set = $this->Database->Usuario

@@ -1,6 +1,6 @@
 <?php
 
-namespace PhpFramework\Response;
+namespace PhpFramework\Response\Interface;
 
 interface IResponse
 {

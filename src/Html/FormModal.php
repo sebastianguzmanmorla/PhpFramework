@@ -10,7 +10,6 @@ use PhpFramework\Html\Enums\InputType;
 use PhpFramework\Html\Enums\ModalDialog;
 use PhpFramework\Layout\Section\Script;
 use PhpFramework\Layout\Section\Toolbar;
-use PhpFramework\Response\HtmlResponse;
 use PhpFramework\Url;
 
 class FormModal extends Form

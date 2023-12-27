@@ -8,7 +8,7 @@ use PhpFramework\Html\Markup;
 use PhpFramework\Layout\ILayout;
 use PhpFramework\Layout\Section\Script;
 use PhpFramework\Layout\Section\Toolbar;
-use PhpFramework\Response\ViewResponse;
+use PhpFramework\Response\Html\ViewResponse;
 
 class Login implements ILayout
 {
@@ -45,7 +45,7 @@ class Login implements ILayout
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?= new Markup(Dom: 'title', Content: $ViewResponse->HtmlResponse->Project . ' - ' . $ViewResponse->HtmlResponse->Title) ?>
+<?= new Markup(Dom: 'title', Content: $ViewResponse->Response->Project . ' - ' . $ViewResponse->Response->Title) ?>
 <?= $ViewResponse->Stylesheets ?>
 </head>
 <body class="bg-dark">
@@ -57,7 +57,7 @@ class Login implements ILayout
         <?= $ViewResponse->Form?->Open() ?>
         <div class="card">
             <div class="card-header text-bg-primary">
-                <h5 class="card-title my-0 text-center"><?= $ViewResponse->HtmlResponse->Title ?></h5>
+                <h5 class="card-title my-0 text-center"><?= $ViewResponse->Response->Title ?></h5>
             </div>
             <div class="card-body">
                 <?= $ViewResponse->Alerts ?>

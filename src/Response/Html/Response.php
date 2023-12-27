@@ -1,6 +1,6 @@
 <?php
 
-namespace PhpFramework\Response;
+namespace PhpFramework\Response\Html;
 
 use PhpFramework\Html\Components\Alerts;
 use PhpFramework\Html\Components\Scripts;
@@ -8,7 +8,7 @@ use PhpFramework\Html\Components\Stylesheets;
 use PhpFramework\Html\Markup;
 use PhpFramework\Layout\ILayout;
 
-class HtmlResponse
+class Response
 {
     public ?string $Title = null;
 

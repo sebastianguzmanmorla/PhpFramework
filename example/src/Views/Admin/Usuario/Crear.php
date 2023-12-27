@@ -21,7 +21,7 @@ use PhpFramework\Html\Validation\Rules\IsValidPassword;
 use PhpFramework\Html\Validation\Rules\IsValidRut;
 use PhpFramework\Html\Validation\Rules\Validate;
 use PhpFramework\Layout\Section\Toolbar;
-use PhpFramework\Response\ViewResponse;
+use PhpFramework\Response\Html\ViewResponse;
 
 #[Form(Method: FormMethod::POST)]
 class Crear extends ViewResponse implements Toolbar

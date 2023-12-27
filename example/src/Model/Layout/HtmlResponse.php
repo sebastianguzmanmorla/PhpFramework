@@ -16,10 +16,10 @@ use PhpFramework\Html\Markup;
 use PhpFramework\Layout\Section\Brand;
 use PhpFramework\Layout\Section\Menu;
 use PhpFramework\Layout\Section\User;
-use PhpFramework\Response\ViewResponse;
+use PhpFramework\Response\Html\ViewResponse;
 use Request\PermisoUsuarioFilter;
 
-class HtmlResponse extends \PhpFramework\Response\HtmlResponse implements Brand, Menu, User
+class HtmlResponse extends \PhpFramework\Response\Html\Response implements Brand, Menu, User
 {
     public function Render(ViewResponse $ViewResponse): void
     {

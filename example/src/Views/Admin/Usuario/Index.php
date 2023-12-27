@@ -17,7 +17,7 @@ use PhpFramework\Html\FormSelect;
 use PhpFramework\Layout\Section\Filters;
 use PhpFramework\Layout\Section\Script;
 use PhpFramework\Layout\Section\Toolbar;
-use PhpFramework\Response\ViewResponse;
+use PhpFramework\Response\Html\ViewResponse;
 
 #[Form(AutoComplete: false, Method: FormMethod::GET, Id: 'ListadoUsuario')]
 class Index extends ViewResponse implements Filters, Script, Toolbar

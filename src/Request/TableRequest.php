@@ -2,24 +2,22 @@
 
 namespace PhpFramework\Request;
 
+use PhpFramework\Attributes\Parameter;
+
 class TableRequest
 {
+    #[Parameter('columns')]
     public array $Columns = [];
 
+    #[Parameter('order')]
     public array $Order = [];
 
+    #[Parameter('draw')]
     public int $Draw = 0;
 
+    #[Parameter('start')]
     public int $Start = 0;
 
+    #[Parameter('length')]
     public int $Length = 10;
-
-    public function __construct()
-    {
-        $this->Columns = $_POST['columns'] ?? [];
-        $this->Order = $_POST['order'] ?? [];
-        $this->Draw = isset($_POST['draw']) ? (int) ($_POST['draw']) : 0;
-        $this->Start = isset($_POST['start']) ? (int) ($_POST['start']) : 0;
-        $this->Length = isset($_POST['length']) ? (int) ($_POST['length']) : 10;
-    }
 }

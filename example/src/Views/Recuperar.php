@@ -13,7 +13,7 @@ use PhpFramework\Html\FormLink;
 use PhpFramework\Layout\Bootstrap\Login as BootstrapLogin;
 use PhpFramework\Layout\Section\Toolbar;
 use PhpFramework\Layout\UseLayout;
-use PhpFramework\Response\ViewResponse;
+use PhpFramework\Response\Html\ViewResponse;
 
 #[Form(AutoComplete: false), UseLayout(BootstrapLogin::class)]
 class Recuperar extends ViewResponse implements Toolbar

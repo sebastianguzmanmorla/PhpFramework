@@ -3,7 +3,7 @@
 namespace PhpFramework\Request;
 
 use Attribute;
-use PhpFramework\Response\IResponse;
+use PhpFramework\Response\Interface\IResponse;
 
 #[Attribute(Attribute::TARGET_METHOD)]
 interface IRequestFilter

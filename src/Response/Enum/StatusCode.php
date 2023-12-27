@@ -1,6 +1,6 @@
 <?php
 
-namespace PhpFramework\Response;
+namespace PhpFramework\Response\Enum;
 
 /**
  * This follows RFC 9110 Section 15.

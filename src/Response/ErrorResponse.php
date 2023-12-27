@@ -2,6 +2,11 @@
 
 namespace PhpFramework\Response;
 
+use PhpFramework\Response\Enum\StatusCode;
+use PhpFramework\Response\Html\ErrorResponse as ErrorHtmlResponse;
+use PhpFramework\Response\Interface\IResponse;
+use PhpFramework\Response\Json\ErrorResponse as ErrorJsonResponse;
+
 class ErrorResponse implements IResponse
 {
     public StatusCode $StatusCode;

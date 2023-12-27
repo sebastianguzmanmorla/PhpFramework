@@ -14,6 +14,7 @@ use PhpFramework\Html\Validation\Rules\IsNotNull;
 use PhpFramework\Html\Validation\Rules\IsValidEmail;
 use PhpFramework\Html\Validation\Rules\IsValidRut;
 use PhpFramework\Html\Validation\Rules\Validate;
+use PhpFramework\Html\Validation\Validation;
 use ReflectionProperty;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
@@ -102,6 +103,11 @@ class Field
     public function __toString()
     {
         return ($this->Table !== null ? $this->Table . '.' : '') . $this->Field;
+    }
+
+    public function Validation(): Validation
+    {
+        return new Validation(fn (DbTable $x) => $this->GetValue($x));
     }
 
     public function Initialize(

@@ -16,7 +16,7 @@ use PhpFramework\Html\FormLink;
 use PhpFramework\Html\Validation\Rules\IsNotNullOrEmpty;
 use PhpFramework\Html\Validation\Rules\IsValidPassword;
 use PhpFramework\Layout\Section\Toolbar;
-use PhpFramework\Response\ViewResponse;
+use PhpFramework\Response\Html\ViewResponse;
 
 #[Form(Method: FormMethod::POST)]
 class ModificarPassword extends ViewResponse implements Toolbar

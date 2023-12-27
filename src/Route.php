@@ -3,7 +3,7 @@
 namespace PhpFramework;
 
 use Attribute;
-use PhpFramework\Request\Method;
+use PhpFramework\Request\Enum\Method;
 
 #[Attribute(Attribute::TARGET_METHOD)]
 class Route

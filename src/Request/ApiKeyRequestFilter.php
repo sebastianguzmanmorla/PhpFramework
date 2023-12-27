@@ -3,9 +3,9 @@
 namespace PhpFramework\Request;
 
 use Attribute;
+use PhpFramework\Response\Enum\StatusCode;
 use PhpFramework\Response\ErrorResponse;
-use PhpFramework\Response\IResponse;
-use PhpFramework\Response\StatusCode;
+use PhpFramework\Response\Interface\IResponse;
 use SensitiveParameter;
 
 #[Attribute(Attribute::TARGET_METHOD)]

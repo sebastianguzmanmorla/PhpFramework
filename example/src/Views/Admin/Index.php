@@ -2,7 +2,7 @@
 
 namespace Views\Admin;
 
-use PhpFramework\Response\ViewResponse;
+use PhpFramework\Response\Html\ViewResponse;
 
 class Index extends ViewResponse
 {

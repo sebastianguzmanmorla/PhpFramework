@@ -20,7 +20,7 @@ use PhpFramework\Html\Validation\Rules\IsValidEmail;
 use PhpFramework\Html\Validation\Rules\IsValidRut;
 use PhpFramework\Html\Validation\Rules\Validate;
 use PhpFramework\Layout\Section\Toolbar;
-use PhpFramework\Response\ViewResponse;
+use PhpFramework\Response\Html\ViewResponse;
 
 #[Form(Method: FormMethod::POST)]
 class Editar extends ViewResponse implements Toolbar

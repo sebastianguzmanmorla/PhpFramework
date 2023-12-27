@@ -1,8 +1,11 @@
 <?php
 
-namespace PhpFramework\Response;
+namespace PhpFramework\Response\Json;
 
-class JsonResponse implements IResponse
+use PhpFramework\Response\Enum\StatusCode;
+use PhpFramework\Response\Interface\IResponse;
+
+class Response implements IResponse
 {
     private StatusCode $StatusCode = StatusCode::Ok;
 
