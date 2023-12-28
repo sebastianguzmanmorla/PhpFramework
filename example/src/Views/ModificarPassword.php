@@ -31,7 +31,7 @@ class ModificarPassword extends ViewResponse implements Toolbar
 
     public FormInput $usu_rut;
 
-    public FormInput $usu_login;
+    public FormInput $usu_mail;
 
     public FormInput $usu_nombre;
 
@@ -68,9 +68,9 @@ class ModificarPassword extends ViewResponse implements Toolbar
             ReadOnly: true
         );
 
-        $this->usu_login = new FormInput(
-            Label: 'Usuario',
-            Value: fn () => $this->Usuario->usu_login ?? '',
+        $this->usu_mail = new FormInput(
+            Label: 'Correo',
+            Value: fn () => $this->Usuario->usu_mail ?? '',
             Disabled: true,
             ReadOnly: true
         );
@@ -134,7 +134,7 @@ class ModificarPassword extends ViewResponse implements Toolbar
         <?= $this->id_usuario ?>
         <?= $this->tus_nombre ?>
         <?= $this->usu_rut ?>
-        <?= $this->usu_login ?>
+        <?= $this->usu_mail ?>
         <?= $this->usu_nombre ?>
         <?= $this->usu_apellido ?>
         <?= $this->usu_pass ?>

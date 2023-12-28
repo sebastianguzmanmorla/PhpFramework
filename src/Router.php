@@ -28,6 +28,17 @@ final class Router
 
     public static array $Routes = [];
 
+    public static function BaseUrl()
+    {
+        if (isset($_SERVER['HTTPS'])) {
+            $protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off') ? 'https' : 'http';
+        } else {
+            $protocol = 'http';
+        }
+
+        return $protocol . '://' . $_SERVER['HTTP_HOST'] . '/';
+    }
+
     public static function XssClean($Input)
     {
         if (is_array($Input)) {

@@ -3,6 +3,7 @@
 namespace PhpFramework\Response\Json;
 
 use Exception;
+use PhpFramework\Attributes\Validation;
 use PhpFramework\Database\DbSchema;
 use PhpFramework\Database\DbTable;
 use PhpFramework\Response\Enum\StatusCode;
@@ -58,7 +59,20 @@ class ValidationResponse extends Response
             }
         } else {
             foreach ($Reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $Property) {
+                $Validation = $Property->getAttributes(Validation::class);
+                $Validation = empty($Validation) ? null : $Validation[0]->newInstance();
+
+                if ($Validation === null) {
+                    continue;
+                }
+
                 $Value = $Property->getValue($Context);
+
+                if (!$Validation->Validate($Value)) {
+                    $this->Errors[$Property->getName()] = $Validation->Errors;
+
+                    $Valid = false;
+                }
             }
         }
 

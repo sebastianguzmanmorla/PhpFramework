@@ -17,12 +17,12 @@ class IsValidEmail implements IValidationRule
         ?string $Helper = null,
         ?Field &$Field = null
     ) {
-        $this->NotValidMessage = $NotValidMessage ?? ($Field?->Label ?? $Field?->Field ?? 'El Valor') . ' debe ser un email válido';
+        $this->NotValidMessage = $NotValidMessage ?? ($Field?->Label ?? $Field?->Field ?? 'El Valor') . ' debe ser un correo válido';
         $this->Helper = $Helper;
     }
 
-    public function Validate(mixed $value, ?DbTable $Table = null): bool
+    public function Validate(mixed $Value, ?DbTable $Table = null): bool
     {
-        return filter_var($value, FILTER_VALIDATE_EMAIL);
+        return filter_var($Value, FILTER_VALIDATE_EMAIL);
     }
 }

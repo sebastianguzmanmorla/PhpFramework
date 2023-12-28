@@ -42,9 +42,9 @@ class DbResourceSet implements ArrayAccess, Iterator, JsonSerializable
         return $this->current()->__get($key);
     }
 
-    public function __set($key, $value): void
+    public function __set($key, $Value): void
     {
-        $this->current()->__set($key, $value);
+        $this->current()->__set($key, $Value);
     }
 
     public function __isset($key): bool
@@ -125,9 +125,9 @@ class DbResourceSet implements ArrayAccess, Iterator, JsonSerializable
         return $this->current()->__get($key);
     }
 
-    public function offsetSet($key, $value): void
+    public function offsetSet($key, $Value): void
     {
-        $this->current()->__set($key, $value);
+        $this->current()->__set($key, $Value);
     }
 
     public function offsetExists(mixed $key): bool
@@ -152,15 +152,15 @@ class DbResourceSet implements ArrayAccess, Iterator, JsonSerializable
     {
         $array = [];
         foreach ($this->Data as $item) {
-            $value = $item->__get($key);
+            $Value = $item->__get($key);
 
             foreach ($keys as $k) {
-                $value = [$item->__get($k) => $value];
+                $Value = [$item->__get($k) => $Value];
             }
-            if (is_array($value)) {
-                $array = static::arrayMerge($array, $value);
+            if (is_array($Value)) {
+                $array = static::arrayMerge($array, $Value);
             } else {
-                $array[] = $value;
+                $array[] = $Value;
             }
         }
 
@@ -169,12 +169,12 @@ class DbResourceSet implements ArrayAccess, Iterator, JsonSerializable
 
     private static function arrayMerge(array $array1, array $array2)
     {
-        foreach ($array2 as $key => $value) {
+        foreach ($array2 as $key => $Value) {
             if (!array_key_exists($key, $array1)) {
-                $array1[$key] = $value;
+                $array1[$key] = $Value;
             } else {
                 $array1[$key] = is_array($array1[$key]) ? $array1[$key] : [$array1[$key]];
-                $array1[$key][] = $value;
+                $array1[$key][] = $Value;
             }
         }
 

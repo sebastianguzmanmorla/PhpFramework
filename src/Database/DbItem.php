@@ -44,15 +44,15 @@ class DbItem extends stdClass implements ArrayAccess, IResponse, JsonSerializabl
         throw new Exception("Property {$name} not found");
     }
 
-    public function __set(string $name, mixed $value): void
+    public function __set(string $name, mixed $Value): void
     {
         $Reflection = new ReflectionObject($this);
 
-        if ($value instanceof DbTable || $Reflection->name == self::class) {
-            $this->{$name} = $value;
+        if ($Value instanceof DbTable || $Reflection->name == self::class) {
+            $this->{$name} = $Value;
         } else {
             if ($Reflection->hasProperty($name)) {
-                $Reflection->getProperty($name)->setValue($this, $value);
+                $Reflection->getProperty($name)->setValue($this, $Value);
             } else {
                 $Properties = $Reflection->getProperties();
 
@@ -63,7 +63,7 @@ class DbItem extends stdClass implements ArrayAccess, IResponse, JsonSerializabl
                         $TableReflection = new ReflectionClass($Table);
 
                         if ($TableReflection->hasProperty($name)) {
-                            $TableReflection->getProperty($name)->setValue($Table, $value);
+                            $TableReflection->getProperty($name)->setValue($Table, $Value);
                         }
                     }
                 }
@@ -117,9 +117,9 @@ class DbItem extends stdClass implements ArrayAccess, IResponse, JsonSerializabl
         return $this->__get($offset);
     }
 
-    public function offsetSet(mixed $offset, mixed $value): void
+    public function offsetSet(mixed $offset, mixed $Value): void
     {
-        $this->__set($offset, $value);
+        $this->__set($offset, $Value);
     }
 
     public function offsetUnset(mixed $offset): void

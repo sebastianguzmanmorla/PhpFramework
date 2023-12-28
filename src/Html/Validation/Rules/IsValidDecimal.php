@@ -23,9 +23,9 @@ class IsValidDecimal implements IValidationRule
         $this->Helper = $Helper;
     }
 
-    public function Validate(mixed $value, ?DbTable $Table = null): bool
+    public function Validate(mixed $Value, ?DbTable $Table = null): bool
     {
-        return preg_match(static::RegexDecimal($this->NumericoMax, $this->DecimalMax), $value);
+        return preg_match(static::RegexDecimal($this->NumericoMax, $this->DecimalMax), $Value);
     }
 
     public static function RegexDecimal(int $NumericoMax, int $DecimalMax, bool $Negativo = false): string

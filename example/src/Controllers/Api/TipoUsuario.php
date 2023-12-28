@@ -7,37 +7,36 @@ use PhpFramework\Attributes\Singleton;
 use PhpFramework\Controller;
 use PhpFramework\Request\Enum\Method;
 use PhpFramework\Response\Enum\StatusCode;
-use PhpFramework\Response\Interface\IResponse;
-use PhpFramework\Response\Json\ErrorResponse as ErrorJsonResponse;
-use PhpFramework\Response\Json\Response as JsonResponse;
-use PhpFramework\Response\Json\ValidationResponse as JsonValidationResponse;
+use PhpFramework\Response\Json\ErrorResponse;
+use PhpFramework\Response\Json\Response;
+use PhpFramework\Response\Json\ValidationResponse;
 use PhpFramework\Route;
+use Request\TokenAuthentication;
 
 class TipoUsuario extends Controller
 {
     #[Singleton]
     private \Database\Framework $Database;
 
-    #[Route('api/TipoUsuario', Method::GET)]
-    public function Get(
-        int $id_tipousuario
-    ): IResponse {
+    #[Route('api/TipoUsuario', Method::GET), TokenAuthentication]
+    public function Get(): Response
+    {
         $TipoUsuario_rs = $this->Database->TipoUsuario
-            ->Where(fn (DbTipoUsuario $x) => $x->id_tipousuario == $id_tipousuario && $x->tus_estado == 1)
+            ->Where(fn (DbTipoUsuario $x) => $x->tus_estado == 1)
             ->Select();
 
         if ($TipoUsuario_rs->EOF()) {
-            return new ErrorJsonResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
+            return new ErrorResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
         }
 
-        return $TipoUsuario_rs->current();
+        return new Response(Object: $TipoUsuario_rs);
     }
 
-    #[Route('api/TipoUsuario', Method::POST)]
+    #[Route('api/TipoUsuario', Method::POST), TokenAuthentication]
     public function Post(
         DbTipoUsuario $Request
-    ): IResponse {
-        $Response = new JsonValidationResponse();
+    ): Response {
+        $Response = new ValidationResponse();
 
         if (!$Response->Validate($Request, $this->Database, true)) {
             return $Response;
@@ -48,11 +47,11 @@ class TipoUsuario extends Controller
         return $Request;
     }
 
-    #[Route('api/TipoUsuario', Method::PUT)]
+    #[Route('api/TipoUsuario', Method::PUT), TokenAuthentication]
     public function Put(
         DbTipoUsuario $Request
-    ): IResponse {
-        $Response = new JsonValidationResponse();
+    ): Response {
+        $Response = new ValidationResponse();
 
         if (!$Response->Validate($Request, $this->Database)) {
             return $Response;
@@ -64,31 +63,31 @@ class TipoUsuario extends Controller
         $TipoUsuario_rs = $TipoUsuario_set->Select();
 
         if ($TipoUsuario_rs->EOF()) {
-            return new ErrorJsonResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
+            return new ErrorResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
         }
 
         $TipoUsuario_set->Update($Request);
 
-        return new JsonResponse(StatusCode::Ok);
+        return new Response(StatusCode::Ok);
     }
 
-    #[Route('api/TipoUsuario', Method::DELETE)]
+    #[Route('api/TipoUsuario', Method::DELETE), TokenAuthentication]
     public function Delete(
         int $id_tipousuario
-    ): IResponse {
+    ): Response {
         $TipoUsuario_set = $this->Database->TipoUsuario
             ->Where(fn (DbTipoUsuario $x) => $x->id_tipousuario == $id_tipousuario);
 
         $TipoUsuario_rs = $TipoUsuario_set->Select();
 
         if ($TipoUsuario_rs->EOF()) {
-            return new ErrorJsonResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
+            return new ErrorResponse(StatusCode::NotFound, 'Tipo de Usuario no encontrado');
         }
 
         $TipoUsuario_set->Update(new DbTipoUsuario(
             tus_estado: 0
         ));
 
-        return new JsonResponse(StatusCode::Ok);
+        return new Response(StatusCode::Ok);
     }
 }

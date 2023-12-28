@@ -70,8 +70,8 @@ class Field
         if ($this->IsUnique) {
             $this->ValidationRules[] = new Validate(
                 NotValidMessage: 'Ya existe un registro con este ' . ($this->Label ?? $this->Field),
-                Validation: function (mixed $value, ?DbTable $Context = null) {
-                    if ($value === null) {
+                Validation: function (mixed $Value, ?DbTable $Context = null) {
+                    if ($Value === null) {
                         return true;
                     }
 
@@ -79,7 +79,7 @@ class Field
                         ->WhereValue(new DbValue(
                             Field: $this,
                             Where: DbWhere::Equal,
-                            Value: $value
+                            Value: $Value
                         ));
 
                     foreach ($this->Table->GetFilters() as $Filter) {

@@ -26,7 +26,7 @@ class Index extends ViewResponse implements Filters, Script, Toolbar
 
     public FormSelect $id_tipousuario;
 
-    public FormInput $usu_login;
+    public FormInput $usu_mail;
 
     public FormInput $usu_mail;
 
@@ -62,14 +62,8 @@ class Index extends ViewResponse implements Filters, Script, Toolbar
             Name: 'id_tipousuario'
         );
 
-        $this->usu_login = new FormInput(
-            Label: 'Usuario',
-            Id: 'usu_login',
-            Name: 'usu_login'
-        );
-
         $this->usu_mail = new FormInput(
-            Label: 'Email',
+            Label: 'Correo',
             Id: 'usu_mail',
             Name: 'usu_mail'
         );
@@ -131,13 +125,10 @@ class Index extends ViewResponse implements Filters, Script, Toolbar
     <?= $this->id_tipousuario ?>
 </div>
 <div class="col">
-    <?= $this->usu_login ?>
+    <?= $this->usu_mail ?>
 </div>
 <div class="col">
     <?= $this->usu_nombre ?>
-</div>
-<div class="col">
-    <?= $this->usu_mail ?>
 </div>
 <?php
     }
@@ -154,9 +145,8 @@ class Index extends ViewResponse implements Filters, Script, Toolbar
                         <th>ID</th>
                         <th>Rut</th>
                         <th>Tipo Usuario</th>
-                        <th>Usuario</the>
                         <th>Nombre</th>
-                        <th>Email</th>
+                        <th>Correo</th>
                         <th>Último Login</th>
                         <th></th>
                     </tr>
@@ -189,9 +179,8 @@ class Index extends ViewResponse implements Filters, Script, Toolbar
                 { data: 'id_usuario', width: '5%' },
                 { data: 'usu_rut', width: '10%' },
                 { data: 'tus_nombre', width: '10%' },
-                { data: 'usu_login', width: '10%' },
-                { data: 'usu_nombre' },
                 { data: 'usu_mail', width: '10%' },
+                { data: 'usu_nombre' },
                 { data: 'usu_ultimologin', width: '10%' },
                 { data: 'Acciones', orderable: false, searchable: false, width: '5%' }
             ],
@@ -201,7 +190,7 @@ class Index extends ViewResponse implements Filters, Script, Toolbar
                 data: function (params) {
                     params.id_usuario = $('#id_usuario').val();
                     params.id_tipousuario = $('#id_tipousuario').val();
-                    params.usu_login = $('#usu_login').val();
+                    params.usu_mail = $('#usu_mail').val();
                     params.usu_mail = $('#usu_mail').val();
                     params.usu_rut = $('#usu_rut').val();
                     params.usu_nombre = $('#usu_nombre').val();
@@ -216,7 +205,7 @@ class Index extends ViewResponse implements Filters, Script, Toolbar
         $('#id_tipousuario').change(function () {
             $('#ListadoUsuarioDataTable').DataTable().ajax.reload();
         });
-        $('#usu_login').change(function () {
+        $('#usu_mail').change(function () {
             $('#ListadoUsuarioDataTable').DataTable().ajax.reload();
         });
         $('#usu_mail').change(function () {

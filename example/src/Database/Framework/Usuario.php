@@ -23,29 +23,6 @@ class Usuario extends DbTable
         )]
         public Field|int|null $id_tipousuario = null,
         #[Field(
-            Field: 'usu_rut',
-            Type: DbType::Varchar,
-            FieldLength: 10,
-            IsUnique: true,
-            IsRut: true
-        )]
-        public Field|string|null $usu_rut = null,
-        #[Field(
-            Field: 'usu_login',
-            Type: DbType::Varchar,
-            FieldLength: 50,
-            IsUnique: true,
-            MinLength: 3,
-            MaxLength: 50
-        )]
-        public Field|string|null $usu_login = null,
-        #[Field(
-            Field: 'usu_pass',
-            Type: DbType::Varchar,
-            FieldLength: 100,
-        )]
-        public Field|string|null $usu_pass = null,
-        #[Field(
             Field: 'usu_mail',
             Type: DbType::Varchar,
             FieldLength: 100,
@@ -53,6 +30,20 @@ class Usuario extends DbTable
             IsMail: true
         )]
         public Field|string|null $usu_mail = null,
+        #[Field(
+            Field: 'usu_pass',
+            Type: DbType::Varchar,
+            FieldLength: 100,
+        )]
+        public Field|string|null $usu_pass = null,
+        #[Field(
+            Field: 'usu_rut',
+            Type: DbType::Varchar,
+            FieldLength: 10,
+            IsUnique: true,
+            IsRut: true
+        )]
+        public Field|string|null $usu_rut = null,
         #[Field(
             Field: 'usu_nombre',
             Type: DbType::Varchar,

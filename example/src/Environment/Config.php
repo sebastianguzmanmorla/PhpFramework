@@ -24,6 +24,7 @@ class Config extends FrameworkConfig
         public string $Database,
         bool $Debug,
         string $HashidsSalt,
+        string $JwtSecret,
         string $SessionName,
         int $SessionLifetime = 86400,
         string $SessionPath = '/',
@@ -34,6 +35,7 @@ class Config extends FrameworkConfig
         parent::__construct(
             Debug: $Debug,
             HashidsSalt: $HashidsSalt,
+            JwtSecret: $JwtSecret,
             SessionName: $SessionName,
             SessionLifetime: $SessionLifetime,
             SessionPath: $SessionPath,
@@ -54,6 +56,7 @@ class Config extends FrameworkConfig
                 Username: getenv('DATABASE_USER'),
                 Password: getenv('DATABASE_PASSWORD'),
                 Database: getenv('DATABASE_DATABASE'),
+                JwtSecret: getenv('JWT_SECRET'),
                 Debug: false,
                 HashidsSalt: getenv('HASHIDS_SALT'),
                 SessionName: 'framework-example'

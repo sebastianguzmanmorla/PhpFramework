@@ -938,149 +938,149 @@ class SqlFormatter
     /**
      * Highlights a quoted string.
      *
-     * @param string $value The token's value
+     * @param string $Value The token's value
      *
      * @return string HTML code of the highlighted token
      */
-    protected static function highlightQuote($value)
+    protected static function highlightQuote($Value)
     {
         if (self::is_cli()) {
-            return self::$cli_quote . $value . "\x1b[0m";
+            return self::$cli_quote . $Value . "\x1b[0m";
         }
 
-        return '<span ' . self::$quote_attributes . '>' . $value . '</span>';
+        return '<span ' . self::$quote_attributes . '>' . $Value . '</span>';
     }
 
     /**
      * Highlights a backtick quoted string.
      *
-     * @param string $value The token's value
+     * @param string $Value The token's value
      *
      * @return string HTML code of the highlighted token
      */
-    protected static function highlightBacktickQuote($value)
+    protected static function highlightBacktickQuote($Value)
     {
         if (self::is_cli()) {
-            return self::$cli_backtick_quote . $value . "\x1b[0m";
+            return self::$cli_backtick_quote . $Value . "\x1b[0m";
         }
 
-        return '<span ' . self::$backtick_quote_attributes . '>' . $value . '</span>';
+        return '<span ' . self::$backtick_quote_attributes . '>' . $Value . '</span>';
     }
 
     /**
      * Highlights a reserved word.
      *
-     * @param string $value The token's value
+     * @param string $Value The token's value
      *
      * @return string HTML code of the highlighted token
      */
-    protected static function highlightReservedWord($value)
+    protected static function highlightReservedWord($Value)
     {
         if (self::is_cli()) {
-            return self::$cli_reserved . $value . "\x1b[0m";
+            return self::$cli_reserved . $Value . "\x1b[0m";
         }
 
-        return '<span ' . self::$reserved_attributes . '>' . $value . '</span>';
+        return '<span ' . self::$reserved_attributes . '>' . $Value . '</span>';
     }
 
     /**
      * Highlights a boundary token.
      *
-     * @param string $value The token's value
+     * @param string $Value The token's value
      *
      * @return string HTML code of the highlighted token
      */
-    protected static function highlightBoundary($value)
+    protected static function highlightBoundary($Value)
     {
-        if ($value === '(' || $value === ')') {
-            return $value;
+        if ($Value === '(' || $Value === ')') {
+            return $Value;
         }
 
         if (self::is_cli()) {
-            return self::$cli_boundary . $value . "\x1b[0m";
+            return self::$cli_boundary . $Value . "\x1b[0m";
         }
 
-        return '<span ' . self::$boundary_attributes . '>' . $value . '</span>';
+        return '<span ' . self::$boundary_attributes . '>' . $Value . '</span>';
     }
 
     /**
      * Highlights a number.
      *
-     * @param string $value The token's value
+     * @param string $Value The token's value
      *
      * @return string HTML code of the highlighted token
      */
-    protected static function highlightNumber($value)
+    protected static function highlightNumber($Value)
     {
         if (self::is_cli()) {
-            return self::$cli_number . $value . "\x1b[0m";
+            return self::$cli_number . $Value . "\x1b[0m";
         }
 
-        return '<span ' . self::$number_attributes . '>' . $value . '</span>';
+        return '<span ' . self::$number_attributes . '>' . $Value . '</span>';
     }
 
     /**
      * Highlights an error.
      *
-     * @param string $value The token's value
+     * @param string $Value The token's value
      *
      * @return string HTML code of the highlighted token
      */
-    protected static function highlightError($value)
+    protected static function highlightError($Value)
     {
         if (self::is_cli()) {
-            return self::$cli_error . $value . "\x1b[0m";
+            return self::$cli_error . $Value . "\x1b[0m";
         }
 
-        return '<span ' . self::$error_attributes . '>' . $value . '</span>';
+        return '<span ' . self::$error_attributes . '>' . $Value . '</span>';
     }
 
     /**
      * Highlights a comment.
      *
-     * @param string $value The token's value
+     * @param string $Value The token's value
      *
      * @return string HTML code of the highlighted token
      */
-    protected static function highlightComment($value)
+    protected static function highlightComment($Value)
     {
         if (self::is_cli()) {
-            return self::$cli_comment . $value . "\x1b[0m";
+            return self::$cli_comment . $Value . "\x1b[0m";
         }
 
-        return '<span ' . self::$comment_attributes . '>' . $value . '</span>';
+        return '<span ' . self::$comment_attributes . '>' . $Value . '</span>';
     }
 
     /**
      * Highlights a word token.
      *
-     * @param string $value The token's value
+     * @param string $Value The token's value
      *
      * @return string HTML code of the highlighted token
      */
-    protected static function highlightWord($value)
+    protected static function highlightWord($Value)
     {
         if (self::is_cli()) {
-            return self::$cli_word . $value . "\x1b[0m";
+            return self::$cli_word . $Value . "\x1b[0m";
         }
 
-        return '<span ' . self::$word_attributes . '>' . $value . '</span>';
+        return '<span ' . self::$word_attributes . '>' . $Value . '</span>';
     }
 
     /**
      * Highlights a variable token.
      *
-     * @param string $value The token's value
+     * @param string $Value The token's value
      *
      * @return string HTML code of the highlighted token
      */
-    protected static function highlightVariable($value)
+    protected static function highlightVariable($Value)
     {
         if (self::is_cli()) {
-            return self::$cli_variable . $value . "\x1b[0m";
+            return self::$cli_variable . $Value . "\x1b[0m";
         }
 
-        return '<span ' . self::$variable_attributes . '>' . $value . '</span>';
+        return '<span ' . self::$variable_attributes . '>' . $Value . '</span>';
     }
 
     /**

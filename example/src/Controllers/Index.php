@@ -51,7 +51,7 @@ class Index extends Controller
     #[Route('Login', Method::POST)]
     public function LoginPost(
         #[SensitiveParameter]
-        ?string $usu_login,
+        ?string $usu_mail,
         #[SensitiveParameter]
         ?string $usu_pass
     ): IResponse {
@@ -61,9 +61,9 @@ class Index extends Controller
 
         $View = new \Views\Login();
 
-        $View->Login->Value = $usu_login;
+        $View->Login->Value = $usu_mail;
 
-        if (null === $usu_login || null === $usu_pass) {
+        if (null === $usu_mail || null === $usu_pass) {
             $View->StatusCode = StatusCode::Unauthorized;
             $View->Alerts->AddAlert(new Alert(AlertType::Danger, 'Datos incorrectos'));
 
@@ -72,7 +72,7 @@ class Index extends Controller
 
         $usuario_rs = $this->Database->Usuario
             ->InnerJoin(fn (TipoUsuario $x, Usuario $y) => $x->id_tipousuario == $y->id_tipousuario)
-            ->Where(fn (Usuario $x) => $x->usu_login == $usu_login && $x->usu_estado == 1)
+            ->Where(fn (Usuario $x) => $x->usu_mail == $usu_mail && $x->usu_estado == 1)
             ->Select();
 
         if (!$usuario_rs->EOF()) {

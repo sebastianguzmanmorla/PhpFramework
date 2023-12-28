@@ -12,6 +12,7 @@ class Development extends Config
             Username: 'framework',
             Password: 'zag4K4wC542xp7z7',
             Database: 'framework',
+            JwtSecret: 'f4c4d3m1c4',
             Debug: true,
             HashidsSalt: 'f4c4d3m1c4',
             SessionName: 'framework-example'

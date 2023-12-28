@@ -13,5 +13,5 @@ interface IValidationRule
         ?Field &$Field = null
     );
 
-    public function Validate(mixed $value, ?DbTable $Table = null): bool;
+    public function Validate(mixed $Value, ?DbTable $Table = null): bool;
 }

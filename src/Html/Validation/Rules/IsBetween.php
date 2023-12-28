@@ -23,8 +23,8 @@ class IsBetween implements IValidationRule
         $this->Helper = $Helper;
     }
 
-    public function Validate(mixed $value, ?DbTable $Table = null): bool
+    public function Validate(mixed $Value, ?DbTable $Table = null): bool
     {
-        return $value >= $this->Min && $value <= $this->Max;
+        return $Value >= $this->Min && $Value <= $this->Max;
     }
 }

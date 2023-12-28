@@ -21,12 +21,12 @@ class IsValidRut implements IValidationRule
         $this->Helper = $Helper;
     }
 
-    public function Validate(mixed $value, ?DbTable $Table = null): bool
+    public function Validate(mixed $Value, ?DbTable $Table = null): bool
     {
-        if (!preg_match('/^[0-9]+-[0-9kK]{1}/', $value)) {
+        if (!preg_match('/^[0-9]+-[0-9kK]{1}/', $Value)) {
             return false;
         }
-        $rut = explode('-', $value);
+        $rut = explode('-', $Value);
 
         return strtolower($rut[1]) == static::Digito($rut[0]);
     }

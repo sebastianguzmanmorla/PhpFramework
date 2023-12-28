@@ -34,7 +34,6 @@ class Usuario extends Controller
     public function Index(
         ?int $id_usuario = null,
         ?int $id_tipousuario = null,
-        ?string $usu_login = null,
         ?string $usu_mail = null,
         ?string $usu_rut = null,
         ?string $usu_nombre = null
@@ -66,12 +65,6 @@ class Usuario extends Controller
             $View->FiltersOpen = true;
         }
 
-        if ($usu_login !== null) {
-            $View->usu_login->Value = $usu_login;
-
-            $View->FiltersOpen = true;
-        }
-
         if ($usu_mail !== null) {
             $View->usu_mail->Value = $usu_mail;
 
@@ -97,7 +90,6 @@ class Usuario extends Controller
     public function Listado(
         ?int $id_usuario = null,
         ?int $id_tipousuario = null,
-        ?string $usu_login = null,
         ?string $usu_mail = null,
         ?string $usu_rut = null,
         ?string $usu_nombre = null,
@@ -117,10 +109,6 @@ class Usuario extends Controller
             $usuario_set = $usuario_set->Where(fn (DbUsuario $x) => $x->id_tipousuario == $id_tipousuario);
         }
 
-        if ($usu_login !== null) {
-            $usuario_set = $usuario_set->Where(fn (DbUsuario $x) => DbWhere::Like($x->usu_login, $usu_login));
-        }
-
         if ($usu_mail !== null) {
             $usuario_set = $usuario_set->Where(fn (DbUsuario $x) => DbWhere::Like($x->usu_mail, $usu_mail));
         }
@@ -138,7 +126,6 @@ class Usuario extends Controller
             Select: fn (DbUsuario $Usuario, TipoUsuario $TipoUsuario): UsuarioItem => new UsuarioItem(
                 id_usuario: $Usuario->id_usuario,
                 tus_nombre: $TipoUsuario->tus_nombre,
-                usu_login: $Usuario->usu_login,
                 usu_mail: $Usuario->usu_mail,
                 usu_rut: $Usuario->usu_rut,
                 usu_nombre: $Usuario->usu_nombre . ' ' . $Usuario->usu_apellido,
@@ -200,7 +187,6 @@ class Usuario extends Controller
         ?int $id_tipousuario = null,
         ?string $usu_rut = null,
         ?string $usu_mail = null,
-        ?string $usu_login = null,
         ?string $usu_nombre = null,
         ?string $usu_apellido = null,
     ): IResponse {
@@ -219,7 +205,6 @@ class Usuario extends Controller
         $View->Usuario->id_tipousuario = $id_tipousuario;
         $View->Usuario->usu_rut = $usu_rut;
         $View->Usuario->usu_mail = $usu_mail;
-        $View->Usuario->usu_login = $usu_login;
         $View->Usuario->usu_nombre = $usu_nombre;
         $View->Usuario->usu_apellido = $usu_apellido;
 
@@ -272,7 +257,6 @@ class Usuario extends Controller
         ?int $id_tipousuario = null,
         ?string $usu_rut = null,
         ?string $usu_mail = null,
-        ?string $usu_login = null,
         ?string $usu_pass = null,
         ?string $usu_nombre = null,
         ?string $usu_apellido = null,
@@ -297,7 +281,6 @@ class Usuario extends Controller
         $View->Usuario->id_tipousuario = $id_tipousuario;
         $View->Usuario->usu_rut = $usu_rut;
         $View->Usuario->usu_mail = $usu_mail;
-        $View->Usuario->usu_login = $usu_login;
         $View->Usuario->usu_pass = $usu_pass;
         $View->Usuario->usu_nombre = $usu_nombre;
         $View->Usuario->usu_apellido = $usu_apellido;

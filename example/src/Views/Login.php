@@ -32,10 +32,10 @@ class Login extends ViewResponse implements Toolbar
         $this->Title = 'Iniciar Sesión';
 
         $this->Login = new FormInput(
-            Label: 'Usuario',
-            Id: 'usu_login',
-            Name: 'usu_login',
-            Type: InputType::Text,
+            Label: 'Correo',
+            Id: 'usu_mail',
+            Name: 'usu_mail',
+            Type: InputType::Email,
             Format: FormInput::Floating
         );
 

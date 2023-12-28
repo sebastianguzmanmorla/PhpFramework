@@ -194,10 +194,9 @@ $Usuarios = [
     new Usuario(
         id_usuario: 1,
         id_tipousuario: 1,
-        usu_rut: '1-9',
-        usu_login: 'admin',
-        usu_pass: password_hash('NCaJjtyU9KfrpcL6kRsDWn', PASSWORD_BCRYPT),
         usu_mail: 'admin@asdf.asdf',
+        usu_pass: password_hash('NCaJjtyU9KfrpcL6kRsDWn', PASSWORD_BCRYPT),
+        usu_rut: '1-9',
         usu_nombre: 'Administrador',
         usu_apellido: 'Ejemplo'
     ),

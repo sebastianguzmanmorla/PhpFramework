@@ -10,7 +10,6 @@ class UsuarioItem extends DbTable
     public function __construct(
         public ?int $id_usuario = null,
         public ?string $tus_nombre = null,
-        public ?string $usu_login = null,
         public ?string $usu_mail = null,
         public ?string $usu_rut = null,
         public ?string $usu_nombre = null,

@@ -487,7 +487,7 @@ class DbSet
         }
     }
 
-    public function Select(?Closure $Select = null, ?int $Offset = null, ?int $Limit = null, ?TableRequest $TableRequest = null)
+    public function Select(?Closure $Select = null, ?int $Offset = null, ?int $Limit = null, ?TableRequest $TableRequest = null): DbResourceSet
     {
         if ($this->DbSchema->Connection() === false || $this->DbSchema->Locked) {
             return new DbResourceSet();
@@ -827,9 +827,9 @@ class DbSet
         $this->DeleteExecute();
     }
 
-    public function Update(DbTable $value, $old_select = true)
+    public function Update(DbTable $Value, $old_select = true)
     {
-        return $this->UpdateExecute($value, $old_select);
+        return $this->UpdateExecute($Value, $old_select);
     }
 
     private function CaptureProcess(DbValue &$CaptureVar, &$Reflection, &$UsedVariables): void

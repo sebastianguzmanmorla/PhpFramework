@@ -3,6 +3,7 @@
 namespace PhpFramework\Environment;
 
 use PhpFramework\Hashids;
+use PhpFramework\Jwt\Token;
 use PhpFramework\Router;
 
 class Config
@@ -12,6 +13,7 @@ class Config
     public function __construct(
         public bool $Debug,
         public string $HashidsSalt,
+        public string $JwtSecret,
         public string $SessionName,
         public int $SessionLifetime = 86400,
         public string $SessionPath = '/',
@@ -32,6 +34,7 @@ class Config
             default => new self(
                 Debug: false,
                 HashidsSalt: getenv('HASHIDS_SALT'),
+                JwtSecret: getenv('JWT_SECRET'),
                 SessionName: 'framework'
             )
         };
@@ -60,6 +63,8 @@ class Config
         session_start();
 
         Hashids::Initialize(self::$Current->HashidsSalt);
+
+        Token::Initialize(self::$Current->JwtSecret);
     }
 
     public static function Logout(): void

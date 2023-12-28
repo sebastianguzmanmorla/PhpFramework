@@ -13,7 +13,6 @@ use PhpFramework\Html\FormButton;
 use PhpFramework\Html\FormInput;
 use PhpFramework\Html\FormLink;
 use PhpFramework\Html\FormSelect;
-use PhpFramework\Html\Validation\Rules\IsLengthValid;
 use PhpFramework\Html\Validation\Rules\IsNotNullOrEmpty;
 use PhpFramework\Html\Validation\Rules\IsNotNullOrZero;
 use PhpFramework\Html\Validation\Rules\IsValidEmail;
@@ -36,7 +35,7 @@ class Editar extends ViewResponse implements Toolbar
 
     public FormInput $usu_mail;
 
-    public FormInput $usu_login;
+    public FormInput $usu_mail;
 
     public FormInput $usu_nombre;
 
@@ -65,8 +64,8 @@ class Editar extends ViewResponse implements Toolbar
                 new IsValidRut('El Rut no es válido'),
                 new Validate(
                     NotValidMessage: 'Ya existe un usuario con este Rut',
-                    Validation: fn (mixed $value) => $this->Database->Usuario
-                        ->Where(fn (Usuario $x) => $x->usu_rut == $value && $x->usu_estado == 1 && $x->id_usuario != $this->Usuario->id_usuario)
+                    Validation: fn (mixed $Value) => $this->Database->Usuario
+                        ->Where(fn (Usuario $x) => $x->usu_rut == $Value && $x->usu_estado == 1 && $x->id_usuario != $this->Usuario->id_usuario)
                         ->Select()
                         ->EOF()
                 ),
@@ -79,30 +78,12 @@ class Editar extends ViewResponse implements Toolbar
             Name: 'usu_mail',
             Value: fn () => $this->Usuario->usu_mail ?? '',
             ValidationRule: [
-                new IsNotNullOrEmpty('El Email es obligatorio'),
-                new IsValidEmail('El Email no es válido'),
+                new IsNotNullOrEmpty('El Correo es obligatorio'),
+                new IsValidEmail('El Correo no es válido'),
                 new Validate(
-                    NotValidMessage: 'Ya existe un usuario con este Email',
-                    Validation: fn (mixed $value) => $this->Database->Usuario
-                        ->Where(fn (Usuario $x) => $x->usu_mail == $value && $x->usu_estado == 1 && $x->id_usuario != $this->Usuario->id_usuario)
-                        ->Select()
-                        ->EOF()
-                ),
-            ]
-        );
-
-        $this->usu_login = new FormInput(
-            Label: 'Usuario',
-            Id: 'usu_login',
-            Name: 'usu_login',
-            Value: fn () => $this->Usuario->usu_login ?? '',
-            ValidationRule: [
-                new IsNotNullOrEmpty('El Usuario es obligatorio'),
-                new IsLengthValid(NotValidMessage: 'El Usuario debe tener entre 3 a 50 caracteres', Min: 3, Max: 50),
-                new Validate(
-                    NotValidMessage: 'Ya existe un usuario con este login',
-                    Validation: fn (mixed $value) => $this->Database->Usuario
-                        ->Where(fn (Usuario $x) => $x->usu_login == $value && $x->usu_estado == 1 && $x->id_usuario != $this->Usuario->id_usuario)
+                    NotValidMessage: 'Ya existe un usuario con este Correo',
+                    Validation: fn (mixed $Value) => $this->Database->Usuario
+                        ->Where(fn (Usuario $x) => $x->usu_mail == $Value && $x->usu_estado == 1 && $x->id_usuario != $this->Usuario->id_usuario)
                         ->Select()
                         ->EOF()
                 ),
@@ -159,7 +140,6 @@ class Editar extends ViewResponse implements Toolbar
         <?= $this->id_tipousuario ?>
         <?= $this->usu_rut ?>
         <?= $this->usu_mail ?>
-        <?= $this->usu_login ?>
         <?= $this->usu_nombre ?>
         <?= $this->usu_apellido ?>
     </div>

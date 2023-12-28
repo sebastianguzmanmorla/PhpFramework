@@ -26,11 +26,11 @@ class DbTable extends Table implements ArrayAccess, IResponse, JsonSerializable
         return null;
     }
 
-    public function __set(string $name, mixed $value): void
+    public function __set(string $name, mixed $Value): void
     {
         if ($this->ReflectionClass->hasProperty($name)) {
             $Property = $this->ReflectionClass->getProperty($name);
-            $Property->setValue($this, $value);
+            $Property->setValue($this, $Value);
         }
     }
 
@@ -65,9 +65,9 @@ class DbTable extends Table implements ArrayAccess, IResponse, JsonSerializable
         return $this->__get($offset);
     }
 
-    public function offsetSet(mixed $offset, mixed $value): void
+    public function offsetSet(mixed $offset, mixed $Value): void
     {
-        $this->__set($offset, $value);
+        $this->__set($offset, $Value);
     }
 
     public function offsetUnset(mixed $offset): void

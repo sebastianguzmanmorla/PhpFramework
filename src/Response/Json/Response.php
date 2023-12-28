@@ -9,8 +9,10 @@ class Response implements IResponse
 {
     protected StatusCode $StatusCode = StatusCode::Ok;
 
-    public function __construct(StatusCode $StatusCode = StatusCode::Ok)
-    {
+    public function __construct(
+        StatusCode $StatusCode = StatusCode::Ok,
+        protected ?object $Object = null
+    ) {
         $this->StatusCode = $StatusCode;
     }
 
@@ -19,6 +21,6 @@ class Response implements IResponse
         header('Content-Type: application/json');
         http_response_code($this->StatusCode->value);
 
-        return json_encode($this);
+        return json_encode($this->Object ?? $this);
     }
 }

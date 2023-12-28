@@ -30,8 +30,8 @@ class IsLengthValid implements IValidationRule
         $this->Helper = $Helper;
     }
 
-    public function Validate(mixed $value, ?DbTable $Table = null): bool
+    public function Validate(mixed $Value, ?DbTable $Table = null): bool
     {
-        return $value !== null && strlen($value) >= $this->Min && strlen($value) <= $this->Max;
+        return $Value !== null && strlen($Value) >= $this->Min && strlen($Value) <= $this->Max;
     }
 }

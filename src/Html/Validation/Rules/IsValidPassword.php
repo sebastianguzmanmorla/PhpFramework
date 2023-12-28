@@ -21,12 +21,12 @@ class IsValidPassword implements IValidationRule
         $this->Helper = $Helper ?? 'La Contraseña debe tener entre 6 y 20 caracteres, al menos una letra mayúscula y un número';
     }
 
-    public function Validate(mixed $value, ?DbTable $Table = null): bool
+    public function Validate(mixed $Value, ?DbTable $Table = null): bool
     {
-        if ($value === null) {
+        if ($Value === null) {
             return false;
         }
 
-        return preg_match('^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{6,20}$^', $value);
+        return preg_match('^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{6,20}$^', $Value);
     }
 }
