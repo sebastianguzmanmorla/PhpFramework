@@ -29,6 +29,8 @@ class Index extends ViewResponse implements Filters, Script, Toolbar
 
     public FormButton $Buscar;
 
+    public FormButton $Excel;
+
     public FormModal $Borrar;
 
     public bool $FiltersOpen = false;
@@ -67,6 +69,14 @@ class Index extends ViewResponse implements Filters, Script, Toolbar
             Type: ButtonType::Submit
         );
 
+        $this->Excel = new FormButton(
+            Label: 'Excel',
+            Icon: 'fa fa-file-excel',
+            Color: Color::Success,
+            Type: ButtonType::Button,
+            OnClick: 'Excel()'
+        );
+
         $this->Borrar = new FormModal(
             Id: 'BorrarTipoUsuario',
             ModalTitle: 'Borrar Tipo de Usuario',
@@ -93,6 +103,7 @@ class Index extends ViewResponse implements Filters, Script, Toolbar
 <div class="btn-group">
     <?= $this->Limpiar ?>
     <?= $this->Buscar ?>
+    <?= $this->Excel ?>
 </div>
 <?php
     }
@@ -122,6 +133,34 @@ class Index extends ViewResponse implements Filters, Script, Toolbar
     {
         ?>
 <script>
+    async function Excel()
+    {
+        let data = new URLSearchParams();
+        data.append('id_tipousuario', $('#id_tipousuario').val());
+        data.append('tus_nombre', $('#tus_nombre').val());
+        data.append('Excel', 1);
+
+        let response = await fetch('?route=Admin/TipoUsuario/Listado', {
+            method: 'POST',
+            body: data
+        });
+
+        let filename = response.headers
+            .get('Content-Disposition')
+            .split('filename=')[1]
+            .split(';')[0] ?? 'TipoUsuario.xlsx';
+
+        let file = await response.blob();
+
+        let tempUrl = URL.createObjectURL(file);
+        let aTag = document.createElement("a");
+        aTag.href = tempUrl;
+        aTag.setAttribute("download", filename);
+        document.body.appendChild(aTag);
+        aTag.click();
+        aTag.remove();
+    }
+
     const form = document.getElementById('ListadoTipoUsuario');
     form.addEventListener('keypress', function(e) {
     if (e.keyCode === 13) {

@@ -147,6 +147,11 @@ final class Router
                     }
                 }
 
+                if(!$Property->getType()->allowsNull() && $Value === null)
+                {
+                    continue;
+                }
+
                 $Property->setValue($Context, $Value);
             }
         }

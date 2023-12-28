@@ -18,6 +18,7 @@ use PhpFramework\Response\Html\ErrorResponse;
 use PhpFramework\Response\Interface\IResponse;
 use PhpFramework\Response\Json\TableResponse;
 use PhpFramework\Response\RedirectResponse;
+use PhpFramework\Response\XlsxResponse;
 use PhpFramework\Route;
 use Request\PermisoUsuarioFilter;
 
@@ -52,8 +53,9 @@ class TipoUsuario extends Controller
     public function Listado(
         ?int $id_tipousuario = null,
         ?string $tus_nombre = null,
+        ?int $Excel = null,
         ?TableRequest $TableRequest = null
-    ): TableResponse {
+    ): IResponse {
         $View = new \Views\Admin\TipoUsuario\Index();
 
         $TipoUsuario_set = $this->Database->TipoUsuario
@@ -68,7 +70,7 @@ class TipoUsuario extends Controller
         }
 
         $TipoUsuarios = $TipoUsuario_set->Select(
-            TableRequest: $TableRequest,
+            TableRequest: $Excel == 1 ? null : $TableRequest,
             Select: fn (DbTipoUsuario $TipoUsuario): TipoUsuarioItem => new TipoUsuarioItem(
                 id_tipousuario: $TipoUsuario->id_tipousuario,
                 tus_nombre: $TipoUsuario->tus_nombre,
@@ -83,6 +85,31 @@ class TipoUsuario extends Controller
                 )
             )
         );
+
+        if($Excel == 1)
+        {
+            $XlsxResponse = new XlsxResponse(
+                Path: "/tmp/",
+                Name: 'Clientes.xlsx'
+            );
+
+            $XlsxResponse->Spreadsheet->getActiveSheet()->setTitle('Tipo de Usuarios');
+
+            $XlsxResponse->Spreadsheet->getActiveSheet()->setCellValue('A1', 'ID');
+            $XlsxResponse->Spreadsheet->getActiveSheet()->setCellValue('B1', 'Nombre');
+
+            $Row = 2;
+
+            foreach($TipoUsuarios as $item)
+            {
+                $XlsxResponse->Spreadsheet->getActiveSheet()->setCellValue('A'.$Row, $item->id_tipousuario);
+                $XlsxResponse->Spreadsheet->getActiveSheet()->setCellValue('B'.$Row, $item->tus_nombre);
+
+                $Row++;
+            }
+
+            return $XlsxResponse;
+        }
 
         return new TableResponse($TipoUsuarios, $TableRequest);
     }
