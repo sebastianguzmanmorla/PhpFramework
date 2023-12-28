@@ -11,7 +11,7 @@ use Environment\Config;
 use PhpFramework\Attributes\Singleton;
 use PhpFramework\Database\Helpers\SqlFormatter;
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . './../vendor/autoload.php';
 
 spl_autoload_extensions('.php');
 spl_autoload_register();
