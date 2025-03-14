@@ -73,9 +73,4 @@ class Config
         session_start();
         session_regenerate_id(true);
     }
-
-    public static function Process(): ?string
-    {
-        return Router::Process()->Response();
-    }
 }

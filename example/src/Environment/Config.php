@@ -2,13 +2,9 @@
 
 namespace Environment;
 
-use Model\Layout\HtmlResponse;
 use PhpFramework\Attributes\Singleton;
-use PhpFramework\Controller;
 use PhpFramework\Database\Connection\MySql;
 use PhpFramework\Environment\Config as FrameworkConfig;
-use PhpFramework\Layout\Bootstrap\Admin as AdminBootstrap;
-use PhpFramework\Layout\Bootstrap\Login as LoginBootstrap;
 
 class Config extends FrameworkConfig
 {
@@ -72,13 +68,5 @@ class Config extends FrameworkConfig
         ));
 
         Singleton::Add($Database);
-
-        Controller::AutoLoad(realpath('./Controllers'));
-
-        HtmlResponse::InitializeDefault(
-            Project: self::$Project,
-            Author: self::$Author,
-            Layout: isset($_SESSION['Usuario']) ? new AdminBootstrap() : new LoginBootstrap()
-        );
     }
 }

@@ -3,16 +3,17 @@
 namespace PhpFramework\Html\Components;
 
 use PhpFramework\Html\Markup;
+use PhpFramework\Html\MarkupAttribute;
 
 class Stylesheet extends Markup
 {
     public function __construct(
         string $Href,
-        #[HtmlAttribute('integrity')]
+        #[MarkupAttribute('integrity')]
         public ?string $Integrity = null,
-        #[HtmlAttribute('crossorigin')]
+        #[MarkupAttribute('crossorigin')]
         public string $CrossOrigin = 'anonymous',
-        #[HtmlAttribute('referrerpolicy')]
+        #[MarkupAttribute('referrerpolicy')]
         public string $ReferrerPolicy = 'no-referrer'
     ) {
         parent::__construct(
