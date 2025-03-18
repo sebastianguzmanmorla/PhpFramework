@@ -31,7 +31,9 @@ class Markup implements JsonSerializable
         #[MarkupAttribute('for')]
         public ?string $For = null,
         #[MarkupAttribute('type')]
-        public ButtonType|InputType|null $Type = null,
+        public ButtonType|InputType|string|null $Type = null,
+        #[MarkupAttribute('multiple')]
+        public Closure|bool|null $Multiple = null,
         #[MarkupAttribute('value')]
         public mixed $Value = null,
         #[MarkupAttribute('max')]
@@ -153,7 +155,7 @@ class Markup implements JsonSerializable
             if ($MarkupAttribute !== null) {
                 $Value = $Property->getValue($this);
 
-                if ($Value instanceof Closure && $MarkupAttribute->name === 'href') {
+                if ($Value instanceof Closure && in_array($MarkupAttribute->name, ['href', 'src'])) {
                     $Value = new Url($Value);
                 }
 
@@ -169,8 +171,12 @@ class Markup implements JsonSerializable
                     $Value = $Value->Url;
                 }
 
-                if ($Value instanceof DateTime) {
+                if ($Value instanceof DateTime && $this->Type == InputType::Date) {
                     $Value = $Value->format('Y-m-d');
+                }
+
+                if ($Value instanceof DateTime && $this->Type == InputType::DateTime) {
+                    $Value = $Value->format('Y-m-d H:i');
                 }
 
                 if ($Value !== null && $Value !== false) {

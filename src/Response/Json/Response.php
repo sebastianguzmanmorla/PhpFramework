@@ -11,7 +11,7 @@ class Response implements IResponse
 
     public function __construct(
         StatusCode $StatusCode = StatusCode::Ok,
-        protected ?object $Object = null
+        protected array|object|null $Object = null
     ) {
         $this->StatusCode = $StatusCode;
     }

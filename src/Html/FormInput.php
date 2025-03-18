@@ -5,6 +5,7 @@ namespace PhpFramework\Html;
 use Closure;
 use Exception;
 use PhpFramework\Database\Attributes\Field;
+use PhpFramework\Database\Enumerations\DbType;
 use PhpFramework\Html\Enums\InputType;
 use PhpFramework\Html\Validation\IValidation;
 use PhpFramework\Html\Validation\IValidationRule;
@@ -34,6 +35,7 @@ class FormInput extends Markup implements IValidation
         public ?string $Placeholder = null,
         public ?string $Helper = null,
         ?InputType $Type = InputType::Text,
+        bool|null $Multiple = null,
         mixed $Value = null,
         Closure|bool|null $Disabled = null,
         Closure|bool|null $ReadOnly = null,
@@ -49,6 +51,7 @@ class FormInput extends Markup implements IValidation
             Type: $Type,
             Max: $Max,
             MaxLength: $MaxLength,
+            Multiple: $Multiple,
             Value: $Value,
             Disabled: $Disabled,
             ReadOnly: $ReadOnly
@@ -74,6 +77,16 @@ class FormInput extends Markup implements IValidation
             $this->Name ??= $Field->Field;
             $this->Label ??= $Field->Label;
             $this->MaxLength ??= $Field->MaxLength;
+
+            if ($Field->Type == DbType::Date)
+            {
+                $this->Type = InputType::Date;
+            }
+
+            if ($Field->Type == DbType::DateTime)
+            {
+                $this->Type = InputType::DateTime;
+            }
         }
     }
 
@@ -103,7 +116,7 @@ class FormInput extends Markup implements IValidation
                     Dom: 'label',
                     Class: 'form-label',
                     Content: $Context->Label,
-                    For: $Context->Name
+                    For: $Context->Id
                 ),
                 new Markup(
                     Dom: $Context->Dom ?? 'input',
@@ -117,6 +130,7 @@ class FormInput extends Markup implements IValidation
                     Style: $Context->Style,
                     Id: $Context->Id,
                     Name: $Context->Name,
+                    Multiple: $Context->Multiple,
                     Value: $Context->Value
                 ),
                 $Context->Helper !== null ? new Markup(
@@ -148,7 +162,7 @@ class FormInput extends Markup implements IValidation
                     Dom: 'label',
                     Class: 'form-label',
                     Content: $Context->Label,
-                    For: $Context->Name
+                    For: $Context->Id
                 ),
                 new Markup(
                     Dom: $Context->Dom ?? 'input',
@@ -162,6 +176,7 @@ class FormInput extends Markup implements IValidation
                     Style: $Context->Style,
                     Id: $Context->Id,
                     Name: $Context->Name,
+                    Multiple: $Context->Multiple,
                     Value: $Context->Value
                 ),
                 $Context->Helper !== null ? new Markup(
@@ -201,6 +216,7 @@ class FormInput extends Markup implements IValidation
                     Style: $Context->Style,
                     Id: $Context->Id,
                     Name: $Context->Name,
+                    Multiple: $Context->Multiple,
                     Value: $Context->Value,
                     PlaceHolder: $Context->Placeholder
                 ),
@@ -257,6 +273,7 @@ class FormInput extends Markup implements IValidation
                             Style: $Context->Style,
                             Id: $Context->Id,
                             Name: $Context->Name,
+                            Multiple: $Context->Multiple,
                             Value: $Context->Value,
                             PlaceHolder: $Context->Placeholder,
                             AriaLabel: $Context->Placeholder,
@@ -312,6 +329,7 @@ class FormInput extends Markup implements IValidation
                             Style: $Context->Style,
                             Id: $Context->Id,
                             Name: $Context->Name,
+                            Multiple: $Context->Multiple,
                             Value: $Context->Value,
                             PlaceHolder: $Context->Placeholder,
                             AriaLabel: $Context->Placeholder,
@@ -363,6 +381,7 @@ class FormInput extends Markup implements IValidation
                     Style: $Context->Style ?? false,
                     Id: $Context->Id ?? false,
                     Name: $Context->Name ?? false,
+                    Multiple: $Context->Multiple,
                     Value: $Context->Value ?? false,
                     PlaceHolder: $Context->Placeholder ?? false,
                     AriaLabel: $Context->Placeholder ?? false,

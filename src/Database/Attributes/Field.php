@@ -11,6 +11,8 @@ use PhpFramework\Database\Enumerations\DbWhere;
 use PhpFramework\Html\Validation\IValidationRule;
 use PhpFramework\Html\Validation\Rules\IsLengthValid;
 use PhpFramework\Html\Validation\Rules\IsNotNull;
+use PhpFramework\Html\Validation\Rules\IsNotNullOrEmpty;
+use PhpFramework\Html\Validation\Rules\IsNotNullOrZero;
 use PhpFramework\Html\Validation\Rules\IsValidEmail;
 use PhpFramework\Html\Validation\Rules\IsValidRut;
 use PhpFramework\Html\Validation\Rules\Validate;
@@ -31,6 +33,28 @@ class Field
 
     protected ReflectionProperty $Reflection;
 
+    public static function TypeIsNumeric(DbType $Type): bool
+    {
+        return match ($Type) {
+            DbType::Bit,
+            DbType::TinyInt,
+            DbType::Bool,
+            DbType::Boolean,
+            DbType::SmallInt,
+            DbType::MediumInt,
+            DbType::Int,
+            DbType::Integer,
+            DbType::BigInt,
+            DbType::UnsignedInt,
+            DbType::Float,
+            DbType::Double,
+            DbType::DoublePrecision,
+            DbType::Decimal,
+            DbType::Dec => true,
+            default => false
+        };
+    }
+
     public function __construct(
         // Database Attributes
         public ?string $Field = null,
@@ -48,6 +72,7 @@ class Field
         // Validation Attributes
         public ?int $MinLength = null,
         public ?int $MaxLength = null,
+        public bool $IsRequired = false,
         public bool $IsUnique = false,
         public bool $IsMail = false,
         public bool $IsRut = false,
@@ -60,6 +85,17 @@ class Field
         }
         if ($this->MinLength || $this->MaxLength) {
             $this->ValidationRules[] = new IsLengthValid(Field: $this);
+        }
+        if ($this->IsRequired) {
+            if (static::TypeIsNumeric($Type))
+            {
+                $this->ValidationRules[] = new IsNotNullOrEmpty(Field: $this);
+                $this->ValidationRules[] = new IsNotNullOrZero(Field: $this);
+            }
+            else
+            {
+                $this->ValidationRules[] = new IsNotNullOrEmpty(Field: $this);
+            }
         }
         if ($this->IsMail) {
             $this->ValidationRules[] = new IsValidEmail(Field: $this);

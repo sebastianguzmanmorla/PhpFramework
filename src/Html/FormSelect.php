@@ -3,6 +3,7 @@
 namespace PhpFramework\Html;
 
 use Closure;
+use PhpFramework\Database\Attributes\Field;
 use PhpFramework\Html\Validation\IValidationRule;
 
 class FormSelect extends FormInput
@@ -16,8 +17,10 @@ class FormSelect extends FormInput
         Closure|bool|null $Disabled = null,
         Closure|bool|null $ReadOnly = null,
         Closure|array|null $Format = null,
+        bool|null $Multiple = null,
         public array $Options = [],
         mixed $Value = null,
+        ?Field $Field = null,
         IValidationRule ...$ValidationRule
     ) {
         parent::__construct(
@@ -31,7 +34,9 @@ class FormSelect extends FormInput
             ReadOnly: $ReadOnly,
             Format: $Format,
             Type: null,
-            Value: $Value
+            Multiple: $Multiple,
+            Value: $Value,
+            Field: $Field
         );
 
         $this->Validation()->AddRule(...$ValidationRule);

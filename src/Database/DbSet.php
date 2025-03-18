@@ -226,6 +226,12 @@ class DbSet
                     Query: [$Item->__toString()]
                 );
             }
+            else
+            {
+                $Instance->OrderBy[] = new DbQuery(
+                    Query: [$Item]
+                );
+            }
         }
 
         return $Instance;
@@ -344,9 +350,13 @@ class DbSet
             array_push($Query, ' GROUP BY ');
             $GroupBy = [];
             foreach ($this->GroupBy as $Item) {
-                $GroupBy[] = $Item->Query;
+                if (!empty($GroupBy)) {
+                    $GroupBy[] = DbLogic::Comma->value;
+                }
+                array_push($GroupBy, ...$Item->Query);
             }
-            array_push($Query, implode(DbLogic::Comma->value . ' ', $GroupBy));
+
+            array_push($Query, ...$GroupBy);
         }
 
         if (!empty($this->OrderBy)) {
