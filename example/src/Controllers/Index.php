@@ -33,14 +33,14 @@ class Index extends Controller
     #[Route('Index')]
     public function Index(): RedirectResponse
     {
-        return new RedirectResponse(fn (\Controllers\Index $x) => $x->Login());
+        return new RedirectResponse(fn (Index $x) => $x->Login());
     }
 
     #[Route('Login', Method::GET)]
     public function Login(): IResponse
     {
         if (isset($_SESSION['Usuario']['id_usuario'])) {
-            return new RedirectResponse(fn (\Controllers\Admin\Index $x) => $x->Index());
+            return new RedirectResponse(fn (Admin\Index $x) => $x->Index());
         }
 
         $View = new \Views\Login();
@@ -56,7 +56,7 @@ class Index extends Controller
         ?string $usu_pass
     ): IResponse {
         if (isset($_SESSION['Usuario']['id_usuario'])) {
-            return new RedirectResponse(fn (\Controllers\Admin\Index $x) => $x->Index());
+            return new RedirectResponse(fn (Admin\Index $x) => $x->Index());
         }
 
         $View = new \Views\Login();
@@ -113,7 +113,7 @@ class Index extends Controller
 
                 //InsertarLog($usuario_rs->id_usuario, ['REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'], 'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT']]);
 
-                return new RedirectResponse(fn (\Controllers\Admin\Index $x) => $x->Index());
+                return new RedirectResponse(fn (Admin\Index $x) => $x->Index());
             }
         } else {
             $View->Alerts->AddAlert(new Alert(AlertType::Danger, 'Datos incorrectos'));
@@ -205,7 +205,7 @@ class Index extends Controller
     {
         Config::Logout();
 
-        return new RedirectResponse(fn (\Controllers\Index $x) => $x->Index());
+        return new RedirectResponse(fn (Index $x) => $x->Index());
     }
 
     /*

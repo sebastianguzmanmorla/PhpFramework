@@ -225,9 +225,7 @@ class DbSet
                 $Instance->OrderBy[] = new DbQuery(
                     Query: [$Item->__toString()]
                 );
-            }
-            else
-            {
+            } else {
                 $Instance->OrderBy[] = new DbQuery(
                     Query: [$Item]
                 );

@@ -4,7 +4,6 @@ namespace PhpFramework\Environment;
 
 use PhpFramework\Hashids;
 use PhpFramework\Jwt\Token;
-use PhpFramework\Router;
 
 class Config
 {

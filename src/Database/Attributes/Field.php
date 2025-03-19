@@ -33,28 +33,6 @@ class Field
 
     protected ReflectionProperty $Reflection;
 
-    public static function TypeIsNumeric(DbType $Type): bool
-    {
-        return match ($Type) {
-            DbType::Bit,
-            DbType::TinyInt,
-            DbType::Bool,
-            DbType::Boolean,
-            DbType::SmallInt,
-            DbType::MediumInt,
-            DbType::Int,
-            DbType::Integer,
-            DbType::BigInt,
-            DbType::UnsignedInt,
-            DbType::Float,
-            DbType::Double,
-            DbType::DoublePrecision,
-            DbType::Decimal,
-            DbType::Dec => true,
-            default => false
-        };
-    }
-
     public function __construct(
         // Database Attributes
         public ?string $Field = null,
@@ -87,13 +65,10 @@ class Field
             $this->ValidationRules[] = new IsLengthValid(Field: $this);
         }
         if ($this->IsRequired) {
-            if (static::TypeIsNumeric($Type))
-            {
+            if (static::TypeIsNumeric($Type)) {
                 $this->ValidationRules[] = new IsNotNullOrEmpty(Field: $this);
                 $this->ValidationRules[] = new IsNotNullOrZero(Field: $this);
-            }
-            else
-            {
+            } else {
                 $this->ValidationRules[] = new IsNotNullOrEmpty(Field: $this);
             }
         }
@@ -145,6 +120,28 @@ class Field
     public function __toString()
     {
         return ($this->Table !== null ? $this->Table . '.' : '') . $this->Field;
+    }
+
+    public static function TypeIsNumeric(DbType $Type): bool
+    {
+        return match ($Type) {
+            DbType::Bit,
+            DbType::TinyInt,
+            DbType::Bool,
+            DbType::Boolean,
+            DbType::SmallInt,
+            DbType::MediumInt,
+            DbType::Int,
+            DbType::Integer,
+            DbType::BigInt,
+            DbType::UnsignedInt,
+            DbType::Float,
+            DbType::Double,
+            DbType::DoublePrecision,
+            DbType::Decimal,
+            DbType::Dec => true,
+            default => false
+        };
     }
 
     public function Validation(): Validation

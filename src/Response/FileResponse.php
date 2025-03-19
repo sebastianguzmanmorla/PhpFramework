@@ -6,7 +6,7 @@ use PhpFramework\Response\Interface\IResponse;
 
 class FileResponse implements IResponse
 {
-    const DefaultContentType = "application/octet-stream";
+    const DefaultContentType = 'application/octet-stream';
     const ChunkSize = 2 * (1024 * 1024);
 
     public int $FileSize = 0;
@@ -24,13 +24,13 @@ class FileResponse implements IResponse
         set_time_limit(0);
 
         if (isset($_SERVER['HTTP_RANGE'])) {
-            list($size_unit, $range_orig) = explode('=', $_SERVER['HTTP_RANGE'], 2);
+            [$size_unit, $range_orig] = explode('=', $_SERVER['HTTP_RANGE'], 2);
             $range = explode(',', $range_orig, 2)[0];
-            list($range_start, $range_end) = explode('-', $range, 2);
-            $range_start = intval($range_start);
-            $range_end = $range_end == '' ? $this->FileSize - 1 : intval($range_end);
+            [$range_start, $range_end] = explode('-', $range, 2);
+            $range_start = (int) $range_start;
+            $range_end = $range_end == '' ? $this->FileSize - 1 : (int) $range_end;
 
-            if ($size_unit != "bytes" || $range_start >= $range_end || $range_end > $this->FileSize - 1 || $range_start < 0 || $range_end < 0) {
+            if ($size_unit != 'bytes' || $range_start >= $range_end || $range_end > $this->FileSize - 1 || $range_start < 0 || $range_end < 0) {
                 header('HTTP/1.1 416 Requested Range Not Satisfiable');
                 header('Content-Range: bytes */' . $this->FileSize);
 
@@ -41,7 +41,7 @@ class FileResponse implements IResponse
             header('Accept-Ranges: bytes');
             header('Content-Type: ' . $this->ContentType);
             header('Content-Length: ' . ($range_end - $range_start + 1));
-            header("Content-Disposition: attachment;filename=" . $this->FileName);
+            header('Content-Disposition: attachment;filename=' . $this->FileName);
             header('Content-Range: bytes ' . $range_start . '-' . $range_end . '/' . $this->FileSize);
 
             $handle = fopen($this->FilePath, 'rb');
@@ -59,14 +59,14 @@ class FileResponse implements IResponse
             return null;
         }
 
-        header("Content-Disposition: attachment;filename=" . $this->FileName);
+        header('Content-Disposition: attachment;filename=' . $this->FileName);
         header('Content-Type: ' . $this->ContentType);
-        header("Accept-Ranges: bytes");
-        header("Pragma: public");
-        header("Expires: -1");
-        header("Cache-Control: no-cache");
-        header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
-        header("Content-Length: " . $this->FileSize);
+        header('Accept-Ranges: bytes');
+        header('Pragma: public');
+        header('Expires: -1');
+        header('Cache-Control: no-cache');
+        header('Cache-Control: public, must-revalidate, post-check=0, pre-check=0');
+        header('Content-Length: ' . $this->FileSize);
 
         if ($this->FileSize > self::ChunkSize) {
             $handle = fopen($this->FilePath, 'rb');

@@ -78,13 +78,11 @@ class FormInput extends Markup implements IValidation
             $this->Label ??= $Field->Label;
             $this->MaxLength ??= $Field->MaxLength;
 
-            if ($Field->Type == DbType::Date)
-            {
+            if ($Field->Type == DbType::Date) {
                 $this->Type = InputType::Date;
             }
 
-            if ($Field->Type == DbType::DateTime)
-            {
+            if ($Field->Type == DbType::DateTime) {
                 $this->Type = InputType::DateTime;
             }
         }

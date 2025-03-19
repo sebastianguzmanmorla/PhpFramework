@@ -86,10 +86,9 @@ class TipoUsuario extends Controller
             )
         );
 
-        if($Excel == 1)
-        {
+        if ($Excel == 1) {
             $XlsxResponse = new XlsxResponse(
-                Path: "/tmp/",
+                Path: '/tmp/',
                 Name: 'Clientes.xlsx'
             );
 
@@ -100,12 +99,11 @@ class TipoUsuario extends Controller
 
             $Row = 2;
 
-            foreach($TipoUsuarios as $item)
-            {
-                $XlsxResponse->Spreadsheet->getActiveSheet()->setCellValue('A'.$Row, $item->id_tipousuario);
-                $XlsxResponse->Spreadsheet->getActiveSheet()->setCellValue('B'.$Row, $item->tus_nombre);
+            foreach ($TipoUsuarios as $item) {
+                $XlsxResponse->Spreadsheet->getActiveSheet()->setCellValue('A' . $Row, $item->id_tipousuario);
+                $XlsxResponse->Spreadsheet->getActiveSheet()->setCellValue('B' . $Row, $item->tus_nombre);
 
-                $Row++;
+                ++$Row;
             }
 
             return $XlsxResponse;

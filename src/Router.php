@@ -15,6 +15,7 @@ use PhpFramework\Response\Interface\IResponse;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionNamedType;
+use ReflectionParameter;
 use ReflectionProperty;
 use ReflectionUnionType;
 use Throwable;
@@ -55,7 +56,7 @@ final class Router
 
     public static function RequestProcess(
         Parameter $Parameter,
-        \ReflectionParameter $RouteParameter,
+        ReflectionParameter $RouteParameter,
         mixed &$Context,
         ?ReflectionNamedType $Type = null
     ): void {
@@ -91,9 +92,7 @@ final class Router
                     default:
                         break;
                 }
-            }
-            elseif($RouteParameter->isDefaultValueAvailable())
-            {
+            } elseif ($RouteParameter->isDefaultValueAvailable()) {
                 $Value = $RouteParameter->getDefaultValue();
             }
 
@@ -153,8 +152,7 @@ final class Router
                     }
                 }
 
-                if(!$Property->getType()->allowsNull() && $Value === null)
-                {
+                if (!$Property->getType()->allowsNull() && $Value === null) {
                     continue;
                 }
 
@@ -218,8 +216,7 @@ final class Router
 
                     $Parameter = !empty($Parameter) ? $Parameter[0]->newInstance() : new Parameter();
 
-                    if (!($Parameter instanceof Hashid))
-                    {
+                    if (!($Parameter instanceof Hashid)) {
                         $Parameter->Name ??= $RouteParameter->getName();
                     }
 
@@ -229,7 +226,7 @@ final class Router
 
                     if ($Parameter instanceof Hashid && $Parameter->Method == Method::GET && $Parameter->Name == null) {
                         $RouteParameterValue = array_shift($Hashids);
-                    } else if (!$RouteParameterType->isBuiltin() && $RouteParameterType->getName() != 'DateTime') {
+                    } elseif (!$RouteParameterType->isBuiltin() && $RouteParameterType->getName() != 'DateTime') {
                         $RouteParameterClass = new ReflectionClass($RouteParameterType->getName());
                         $RouteParameterValue = $RouteParameterClass->newInstance();
 
