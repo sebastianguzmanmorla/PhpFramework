@@ -10,6 +10,8 @@ class Config
     private static self $Current;
 
     public function __construct(
+        public string $Project,
+        public string $Author,
         public string $Env,
         public bool $Debug,
         public string $HashidsSalt,
@@ -28,9 +30,11 @@ class Config
         return self::$Current;
     }
 
-    public static function Initialize(?self $Config = null): void
+    public static function Initialize(string $Project, string $Author, ?self $Config = null): void
     {
         self::$Current = $Config ?? new self(
+            Project: $Project,
+            Author: $Author,
             Env: getenv('APP_ENV'),
             Debug: (bool) (getenv('APP_DEBUG')),
             HashidsSalt: getenv('APP_HASHIDS_SALT'),

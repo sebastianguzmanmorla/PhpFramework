@@ -2,7 +2,7 @@
 
 namespace PhpFramework\Layout\Bootstrap;
 
-use Config;
+use PhpFramework\Environment\Config;
 use PhpFramework\Html\Components\Script as ComponentsScript;
 use PhpFramework\Html\Components\Stylesheet;
 use PhpFramework\Html\FormModal;
@@ -80,7 +80,7 @@ class Admin implements ILayout
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?= new Markup(Dom: 'title', Content: Config::$Project . ($ViewResponse->Title !== null ? ' - ' . $ViewResponse->Title : '')) ?>
+<?= new Markup(Dom: 'title', Content: Config::Current()->Project . ($ViewResponse->Title !== null ? ' - ' . $ViewResponse->Title : '')) ?>
 <?= $ViewResponse->Stylesheets ?>
 </head>
 <body>
