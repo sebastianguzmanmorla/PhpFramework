@@ -25,7 +25,7 @@ class Config
     ) {
     }
 
-    public static function Current(): static
+    public static function Current(): self
     {
         return self::$Current;
     }
