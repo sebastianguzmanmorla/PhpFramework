@@ -3,7 +3,7 @@
 namespace PhpFramework\Html\Validation;
 
 use Closure;
-use PhpFramework\Database\DbTable;
+use LiliDb\Interfaces\ITable;
 use PhpFramework\Html\Markup;
 
 class Validation
@@ -37,7 +37,7 @@ class Validation
         return $Helpers;
     }
 
-    final public function Validate(?DbTable $Context = null): bool
+    final public function Validate(?ITable $Context = null): bool
     {
         $this->Errors = [];
 

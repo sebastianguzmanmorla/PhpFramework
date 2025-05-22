@@ -3,11 +3,16 @@
 namespace PhpFramework\Jwt;
 
 use DateTime;
+use Exception;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use PhpFramework\Router;
 use ReflectionClass;
 use ReflectionProperty;
+use stdClass;
+use Throwable;
 
-class Payload
+abstract class JwtToken
 {
     /**
      * Issued at.
@@ -23,6 +28,10 @@ class Payload
      * Expiration time.
      */
     public ?int $exp;
+
+    private static string $Secret;
+
+    private static string $Algorithm;
 
     public function __construct(
         /**
@@ -65,29 +74,50 @@ class Payload
         $this->exp = $exp?->getTimestamp();
     }
 
-    public static function Decode(string $Token): ?static
+    public function __toString()
     {
-        $Array = Token::Decode($Token);
-
-        if ($Array !== false) {
-            $Reflection = new ReflectionClass(static::class);
-
-            return static::RecursiveArrayToObject($Array, $Reflection);
-        }
-
-        return null;
+        return static::Encode($this);
     }
 
-    private static function RecursiveArrayToObject(array $Array, ReflectionClass $Reflection): object
+    public static function Initialize(string $Secret, string $Algorithm = 'HS256'): void
     {
+        static::$Secret = $Secret;
+        static::$Algorithm = $Algorithm;
+    }
+
+    public static function Encode(object $Payload): string
+    {
+        return JWT::encode((array) $Payload, static::$Secret, static::$Algorithm);
+    }
+
+    public static function Decode(string $Token): static|Throwable
+    {
+        try {
+            $Result = JWT::decode($Token, new Key(static::$Secret, static::$Algorithm));
+
+            return static::ConvertTo($Result, static::class);
+        } catch (Throwable $ex) {
+            return $ex;
+        }
+    }
+
+    private static function ConvertTo(stdClass $Object, string $Class): object
+    {
+        $Reflection = new ReflectionClass($Class);
+
         $Output = $Reflection->newInstanceWithoutConstructor();
 
         foreach ($Reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $Property) {
-            $Value = $Array[$Property->getName()] ?? null;
+            $Type = $Property->getType();
 
-            if (!$Property->getType()->isBuiltin() && $Value !== null) {
-                $Type = $Property->getType()->getName();
-                $Value = static::RecursiveArrayToObject($Value, new ReflectionClass($Type));
+            $Value = $Object->{$Property->getName()} ?? null;
+
+            if ($Value === null && !$Type->allowsNull()) {
+                throw new Exception($Property->getName() . ' not set');
+            }
+
+            if (!$Type->isBuiltin() && $Value !== null) {
+                $Value = static::ConvertTo($Value, $Type->getName());
             }
 
             $Property->setValue($Output, $Value);

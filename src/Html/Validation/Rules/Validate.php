@@ -3,8 +3,8 @@
 namespace PhpFramework\Html\Validation\Rules;
 
 use Closure;
-use PhpFramework\Database\Attributes\Field;
-use PhpFramework\Database\DbTable;
+use LiliDb\Interfaces\IField;
+use LiliDb\Interfaces\ITable;
 use PhpFramework\Html\Validation\IValidationRule;
 
 class Validate implements IValidationRule
@@ -16,14 +16,14 @@ class Validate implements IValidationRule
     public function __construct(
         ?string $NotValidMessage = null,
         ?string $Helper = null,
-        ?Field &$Field = null,
+        ?IField &$Field = null,
         public ?Closure $Validation = null
     ) {
         $this->NotValidMessage = $NotValidMessage ?? ($Field?->Label ?? $Field?->Field ?? 'El Valor') . ' no es válido';
         $this->Helper = $Helper;
     }
 
-    public function Validate(mixed $Value, ?DbTable $Table = null): bool
+    public function Validate(mixed $Value, ?ITable $Table = null): bool
     {
         return $this->Validation->__invoke($Value, $Table);
     }

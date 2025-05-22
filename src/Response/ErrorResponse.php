@@ -23,7 +23,10 @@ class ErrorResponse implements IResponse
     {
         $Response = null;
 
-        if (isset($_SERVER['CONTENT_TYPE']) && str_contains($_SERVER['CONTENT_TYPE'], 'application/json')) {
+        if (
+            isset($_SERVER['CONTENT_TYPE']) && str_contains($_SERVER['CONTENT_TYPE'], 'application/json')
+            || isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json')
+        ) {
             $Response = new ErrorJsonResponse($this->StatusCode, ...$this->Errors);
         } else {
             $Response = new ErrorHtmlResponse($this->StatusCode, ...$this->Errors);

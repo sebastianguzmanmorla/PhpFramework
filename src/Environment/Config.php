@@ -3,13 +3,14 @@
 namespace PhpFramework\Environment;
 
 use PhpFramework\Hashids;
-use PhpFramework\Jwt\Token;
+use PhpFramework\Jwt\JwtToken;
 
 class Config
 {
     private static self $Current;
 
     public function __construct(
+        public string $Env,
         public bool $Debug,
         public string $HashidsSalt,
         public string $JwtSecret,
@@ -29,18 +30,17 @@ class Config
 
     public static function Initialize(?self $Config = null): void
     {
-        self::$Current = $Config ?? match (getenv('APP_ENV') ?? 'prd') {
-            default => new self(
-                Debug: false,
-                HashidsSalt: getenv('HASHIDS_SALT'),
-                JwtSecret: getenv('JWT_SECRET'),
-                SessionName: 'framework'
-            )
-        };
+        self::$Current = $Config ?? new self(
+            Env: getenv('APP_ENV'),
+            Debug: (bool) (getenv('APP_DEBUG')),
+            HashidsSalt: getenv('APP_HASHIDS_SALT'),
+            JwtSecret: getenv('APP_JWT_SECRET'),
+            SessionName: getenv('APP_NAME')
+        );
 
         header_remove('X-Powered-By');
 
-        if (getenv('APP_ENV') == 'local') {
+        if (self::$Current->Debug) {
             ini_set('display_errors', 1);
             ini_set('display_startup_errors', 1);
             ini_set('xdebug.var_display_max_depth', 5);
@@ -63,7 +63,7 @@ class Config
 
         Hashids::Initialize(self::$Current->HashidsSalt);
 
-        Token::Initialize(self::$Current->JwtSecret);
+        JwtToken::Initialize(self::$Current->JwtSecret);
     }
 
     public static function Logout(): void

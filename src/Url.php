@@ -6,7 +6,7 @@ use ArrayObject;
 use Closure;
 use Exception;
 use PhpFramework\Attributes\Hashid;
-use PhpFramework\Database\Helpers\SourceReader;
+use PhpToken;
 use ReflectionClass;
 use ReflectionFunction;
 use ReflectionMethod;
@@ -48,7 +48,7 @@ class Url
                 $UsedVariables['$' . $Variable] = $Value;
             }
 
-            $Tokens = SourceReader::readClosure($Reflection, 0);
+            $Tokens = static::ReadClosure($Reflection);
             $Tokens = new ArrayObject($Tokens);
             $Tokens = $Tokens->getIterator();
 
@@ -201,5 +201,70 @@ class Url
     public function __toString(): string
     {
         return $this->Url;
+    }
+
+    private static function ReadClosure(ReflectionFunction $reflection): array
+    {
+        $fileName = $reflection->getFileName();
+        $start = $reflection->getStartLine();
+        $end = $reflection->getEndLine();
+
+        if ($fileName === false || $start === false || $end === false || ($fileContent = file($fileName)) === false) {
+            return [];
+        }
+
+        --$start;
+
+        $tokens = PhpToken::tokenize('<?php ' . implode('', array_slice($fileContent, $start, $end - $start)));
+
+        array_shift($tokens);
+
+        $closureTokens = [];
+        $pendingParenthesisCount = 0;
+
+        $ClosureStart = false;
+
+        foreach ($tokens as $token) {
+            if (in_array($token->id, [390], true)) {
+                $ClosureStart = true;
+
+                continue;
+            }
+
+            if (!$ClosureStart) {
+                continue;
+            }
+
+            if (in_array($token->id, [T_WHITESPACE], true)) {
+                continue;
+            }
+
+            if (self::isOpenParenthesis($token->text)) {
+                ++$pendingParenthesisCount;
+            } elseif (self::isCloseParenthesis($token->text)) {
+                if ($pendingParenthesisCount === 0) {
+                    break;
+                }
+                --$pendingParenthesisCount;
+            } elseif ($token->text === ',' || $token->text === ';') {
+                if ($pendingParenthesisCount === 0) {
+                    break;
+                }
+            }
+
+            $closureTokens[] = $token;
+        }
+
+        return $closureTokens;
+    }
+
+    private static function isOpenParenthesis(string $value): bool
+    {
+        return in_array($value, ['{', '[', '(']);
+    }
+
+    private static function isCloseParenthesis(string $value): bool
+    {
+        return in_array($value, ['}', ']', ')']);
     }
 }

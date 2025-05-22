@@ -2,16 +2,16 @@
 
 namespace PhpFramework\Html\Validation;
 
-use PhpFramework\Database\Attributes\Field;
-use PhpFramework\Database\DbTable;
+use LiliDb\Interfaces\IField;
+use LiliDb\Interfaces\ITable;
 
 interface IValidationRule
 {
     public function __construct(
         ?string $NotValidMessage = null,
         ?string $Helper = null,
-        ?Field &$Field = null
+        ?IField &$Field = null
     );
 
-    public function Validate(mixed $Value, ?DbTable $Table = null): bool;
+    public function Validate(mixed $Value, ?ITable $Table = null): bool;
 }

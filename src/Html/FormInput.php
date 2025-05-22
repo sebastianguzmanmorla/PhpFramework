@@ -4,8 +4,7 @@ namespace PhpFramework\Html;
 
 use Closure;
 use Exception;
-use PhpFramework\Database\Attributes\Field;
-use PhpFramework\Database\Enumerations\DbType;
+use LiliDb\Interfaces\IField;
 use PhpFramework\Html\Enums\InputType;
 use PhpFramework\Html\Validation\IValidation;
 use PhpFramework\Html\Validation\IValidationRule;
@@ -35,13 +34,13 @@ class FormInput extends Markup implements IValidation
         public ?string $Placeholder = null,
         public ?string $Helper = null,
         ?InputType $Type = InputType::Text,
-        bool|null $Multiple = null,
+        ?bool $Multiple = null,
         mixed $Value = null,
         Closure|bool|null $Disabled = null,
         Closure|bool|null $ReadOnly = null,
         Closure|false|array|null $Format = null,
         IValidationRule|array|null $ValidationRule = null,
-        ?Field $Field = null
+        ?IField $Field = null
     ) {
         parent::__construct(
             Dom: $Dom,
@@ -71,6 +70,7 @@ class FormInput extends Markup implements IValidation
             }
         }
 
+        /*
         if ($Field !== null) {
             $this->Validation->AddRule(...$Field->ValidationRules);
             $this->Id ??= $Field->Field;
@@ -86,6 +86,7 @@ class FormInput extends Markup implements IValidation
                 $this->Type = InputType::DateTime;
             }
         }
+        */
     }
 
     public function __toString()

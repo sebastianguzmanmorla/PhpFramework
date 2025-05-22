@@ -3,33 +3,25 @@
 namespace PhpFramework\Jwt;
 
 use Attribute;
+use PhpFramework\Attributes\Singleton;
+use PhpFramework\Request\IAuthentication;
 use PhpFramework\Request\IRequestFilter;
 use PhpFramework\Response\Enum\StatusCode;
 use PhpFramework\Response\ErrorResponse;
 use PhpFramework\Response\Interface\IResponse;
+use Throwable;
 
 #[Attribute(Attribute::TARGET_METHOD)]
-abstract class TokenAuthentication implements IRequestFilter
+abstract class JwtTokenAuthentication implements IAuthentication, IRequestFilter
 {
-    protected static ?Payload $Payload = null;
+    abstract public function Decode(string $Token): Throwable|true;
 
-    public function Decode(string $Token): void
-    {
-        static::$Payload = Payload::Decode($Token);
-    }
-
-    public function Valid(): bool
-    {
-        return static::$Payload !== null;
-    }
-
-    public static function Payload(): ?Payload
-    {
-        return static::$Payload;
-    }
+    abstract public function IsAuthenticated(): bool;
 
     final public function Filter(): ?IResponse
     {
+        Singleton::Set($this, IAuthentication::class);
+
         $Authorization = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
 
         if ($Authorization == null) {
@@ -42,11 +34,13 @@ abstract class TokenAuthentication implements IRequestFilter
             return new ErrorResponse(StatusCode::Unauthorized, 'Authorization header is invalid');
         }
 
-        $Token = $Authorization[1];
+        $Result = $this->Decode($Authorization[1]);
 
-        static::Decode($Token);
+        if ($Result instanceof Throwable) {
+            return new ErrorResponse(StatusCode::Unauthorized, $Result->getMessage());
+        }
 
-        if (!static::Valid(static::$Payload)) {
+        if (!$this->IsAuthenticated()) {
             return new ErrorResponse(StatusCode::Unauthorized, 'Authorization token is invalid');
         }
 

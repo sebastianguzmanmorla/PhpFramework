@@ -8,11 +8,18 @@ use Throwable;
 
 class ExceptionResponse extends ErrorResponse
 {
-    public function __construct(StatusCode $StatusCode, Throwable $Exception)
+    public function __construct(Throwable $Exception, StatusCode $StatusCode = StatusCode::InternalServerError)
     {
         $this->StatusCode = $StatusCode;
+
         if (Config::Current()->Debug) {
-            $this->Errors = [$Exception->getMessage(), ...$this->FormatTrace($Exception->getTrace())];
+            $this->Errors = [
+                sprintf(
+                    '%s(%s): %s',
+                    $Exception->getFile(),
+                    $Exception->getLine(),
+                    $Exception->getMessage(),
+                ), ...$this->FormatTrace($Exception->getTrace())];
         } else {
             $this->Errors = [$Exception->getMessage()];
         }

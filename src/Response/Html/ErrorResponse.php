@@ -8,6 +8,10 @@ use PhpFramework\Response\Enum\StatusCode;
 
 class ErrorResponse extends ViewResponse
 {
+    public ?string $Title = null;
+
+    public ?string $Icon = null;
+
     public array $Errors;
 
     public function __construct(

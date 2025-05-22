@@ -2,8 +2,8 @@
 
 namespace PhpFramework\Html\Validation\Rules;
 
-use PhpFramework\Database\Attributes\Field;
-use PhpFramework\Database\DbTable;
+use LiliDb\Interfaces\IField;
+use LiliDb\Interfaces\ITable;
 use PhpFramework\Html\Validation\IValidationRule;
 
 class IsValidPassword implements IValidationRule
@@ -15,13 +15,13 @@ class IsValidPassword implements IValidationRule
     public function __construct(
         ?string $NotValidMessage = null,
         ?string $Helper = null,
-        ?Field &$Field = null,
+        ?IField &$Field = null,
     ) {
         $this->NotValidMessage = $NotValidMessage ?? 'La Contraseña ingresada no es válida';
         $this->Helper = $Helper ?? 'La Contraseña debe tener entre 6 y 20 caracteres, al menos una letra mayúscula y un número';
     }
 
-    public function Validate(mixed $Value, ?DbTable $Table = null): bool
+    public function Validate(mixed $Value, ?ITable $Table = null): bool
     {
         if ($Value === null) {
             return false;

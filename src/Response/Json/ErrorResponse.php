@@ -12,7 +12,7 @@ class ErrorResponse extends Response
         StatusCode $Status = StatusCode::InternalServerError,
         string ...$Errors
     ) {
-        parent::__construct($Status);
+        parent::__construct(null, $Status);
 
         $this->Errors = $Errors;
     }

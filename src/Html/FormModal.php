@@ -3,6 +3,7 @@
 namespace PhpFramework\Html;
 
 use Closure;
+use Model\Layout\HtmlResponse;
 use PhpFramework\Html\Enums\Color;
 use PhpFramework\Html\Enums\EncType;
 use PhpFramework\Html\Enums\FormMethod;

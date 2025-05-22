@@ -12,19 +12,18 @@ use PhpFramework\Html\Form;
 use PhpFramework\Html\FormModal;
 use PhpFramework\Html\Markup;
 use PhpFramework\Html\Validation\IValidation;
+use PhpFramework\Layout\ILayout;
 use PhpFramework\Layout\UseLayout;
 use PhpFramework\Response\Enum\StatusCode;
+use PhpFramework\Response\ExceptionResponse;
 use PhpFramework\Response\Interface\IResponse;
 use ReflectionClass;
 use ReflectionNamedType;
+use Throwable;
 
 abstract class ViewResponse implements IResponse
 {
-    public Response $Response;
-
-    public ?string $Title;
-
-    public ?string $Icon;
+    public ILayout $Layout;
 
     public Stylesheets $Stylesheets;
 
@@ -36,16 +35,23 @@ abstract class ViewResponse implements IResponse
 
     public StatusCode $StatusCode = StatusCode::Ok;
 
+    private static ILayout $DefaultLayout;
+
+    public abstract ?string $Title
+    {
+        get;
+    }
+
+    public abstract ?string $Icon
+    {
+        get;
+    }
+
     public function __construct()
     {
-        $this->Response = Response::Instance();
-
-        $this->Title = &$this->Response->Title;
-        $this->Icon = &$this->Response->Icon;
-
-        $this->Stylesheets = &$this->Response->Stylesheets;
-        $this->Scripts = &$this->Response->Scripts;
-        $this->Alerts = &$this->Response->Alerts;
+        $this->Stylesheets = new Stylesheets();
+        $this->Scripts = new Scripts();
+        $this->Alerts = new Alerts();
 
         $ReflectionClass = new ReflectionClass(static::class);
 
@@ -54,8 +60,14 @@ abstract class ViewResponse implements IResponse
 
         $UseLayout = $ReflectionClass->getAttributes(UseLayout::class);
 
+        if (empty($UseLayout)) {
+            $UseLayout = $ReflectionClass->getParentClass()->getAttributes(UseLayout::class);
+        }
+
         if (!empty($UseLayout)) {
-            Response::Instance()->Layout = $UseLayout[0]->newInstance()->Layout;
+            $this->Layout = $UseLayout[0]->newInstance()->Layout;
+        } else {
+            $this->Layout = static::$DefaultLayout;
         }
 
         foreach ($ReflectionClass->getProperties() as $Property) {
@@ -78,27 +90,44 @@ abstract class ViewResponse implements IResponse
         $this->Initialize();
     }
 
+    public static function SetDefaultLayout(string $Class): void
+    {
+        $ReflectionClass = new ReflectionClass($Class);
+
+        static::$DefaultLayout = $ReflectionClass->newInstance();
+    }
+
     abstract public function Initialize(): void;
 
     abstract public function Body(): void;
 
     final public function Response(?StatusCode $StatusCode = null): ?string
     {
-        http_response_code($StatusCode?->value ?? $this->StatusCode->value);
+        try {
+            $Body = '';
 
-        header('Content-Type: text/html; charset=utf-8');
+            ob_start();
+            $this->Layout->Render($this);
+            $Body = ob_get_contents();
+            ob_end_clean();
 
-        ob_start();
-        Response::Instance()->Render($this);
-        $Body = ob_get_contents();
-        ob_end_clean();
+            http_response_code($StatusCode?->value ?? $this->StatusCode->value);
 
-        return $Body;
+            header('Content-Type: text/html; charset=utf-8');
+
+            return $Body;
+        } catch (Throwable $ex) {
+            ob_end_clean();
+
+            $Response = new ExceptionResponse($ex);
+
+            return $Response->Response();
+        }
     }
 
     final public function Scripts(): Generator
     {
-        yield $this->Response->Scripts;
+        yield $this->Scripts;
         $Reflection = new ReflectionClass($this);
         foreach ($Reflection->getProperties() as $Property) {
             $PropertyType = $Property->getType();

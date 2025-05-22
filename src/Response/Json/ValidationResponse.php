@@ -3,9 +3,9 @@
 namespace PhpFramework\Response\Json;
 
 use Exception;
+use LiliDb\Database;
+use LiliDb\Interfaces\ITable;
 use PhpFramework\Attributes\Validation;
-use PhpFramework\Database\DbSchema;
-use PhpFramework\Database\DbTable;
 use PhpFramework\Response\Enum\StatusCode;
 use ReflectionClass;
 use ReflectionProperty;
@@ -14,13 +14,13 @@ class ValidationResponse extends Response
 {
     public array $Errors = [];
 
-    final public function Validate(mixed $Context, ?DbSchema $Database = null, $IgnorePrimaryKey = false): bool
+    final public function Validate(mixed $Context, ?Database $Database = null, $IgnorePrimaryKey = false): bool
     {
         $Valid = true;
 
         $Reflection = new ReflectionClass($Context::class);
 
-        if ($Context instanceof DbTable) {
+        if ($Context instanceof ITable) {
             if ($Database === null) {
                 throw new Exception('Database Instance is required');
             }

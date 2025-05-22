@@ -9,9 +9,14 @@ class Singleton
 {
     public static array $vars = [];
 
-    public static function Add(object &$Singleton): void
+    public function __construct(
+        public ?string $Interface = null
+    ) {
+    }
+
+    public static function Set(object &$Singleton, ?string $Interface = null): void
     {
-        static::$vars[get_class($Singleton)] = &$Singleton;
+        static::$vars[$Interface ?? $Singleton::class] = &$Singleton;
     }
 
     public static function &Get(string $Type): ?object

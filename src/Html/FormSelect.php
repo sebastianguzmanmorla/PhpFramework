@@ -3,7 +3,7 @@
 namespace PhpFramework\Html;
 
 use Closure;
-use PhpFramework\Database\Attributes\Field;
+use LiliDb\Interfaces\IField;
 use PhpFramework\Html\Validation\IValidationRule;
 
 class FormSelect extends FormInput
@@ -17,10 +17,10 @@ class FormSelect extends FormInput
         Closure|bool|null $Disabled = null,
         Closure|bool|null $ReadOnly = null,
         Closure|array|null $Format = null,
-        bool|null $Multiple = null,
+        ?bool $Multiple = null,
         public array $Options = [],
         mixed $Value = null,
-        ?Field $Field = null,
+        ?IField $Field = null,
         IValidationRule ...$ValidationRule
     ) {
         parent::__construct(

@@ -176,33 +176,54 @@ final class Router
             if (isset(self::$Routes[$_GET[self::Route]][$_SERVER['REQUEST_METHOD']])) {
                 $Route = self::$Routes[$_GET[self::Route]][$_SERVER['REQUEST_METHOD']];
 
-                foreach ($Route[self::Method]->getAttributes() as $Attribute) {
-                    $Class = new ReflectionClass($Attribute->getName());
-                    if ($Class->isSubclassOf(IRequestFilter::class)) {
-                        $IRequestFilter = $Attribute->newInstance();
-                        $IRequestFilterClass = new ReflectionClass($IRequestFilter::class);
-                        foreach ($IRequestFilterClass->getProperties() as $IRequestFilterProperty) {
-                            $Singleton = $IRequestFilterProperty->getAttributes(Singleton::class);
-                            if (!empty($Singleton)) {
-                                $ControllerPropertyType = $IRequestFilterProperty->getType();
-                                $ControllerPropertyValue = Singleton::Get($ControllerPropertyType->getName());
-                                $IRequestFilterProperty->setValue($IRequestFilter, $ControllerPropertyValue);
-                            }
-                        }
-                        $Filter = $IRequestFilter->Filter();
-                        if ($Filter !== null) {
-                            return $Filter;
-                        }
+                $Filters = [];
+
+                $MethodReflection = $Route[self::Method];
+
+                foreach ($MethodReflection->getAttributes(IRequestFilter::class, ReflectionAttribute::IS_INSTANCEOF) as $Attribute) {
+                    if (!isset($Filters[$Attribute->getName()])) {
+                        $Filters[$Attribute->getName()] = $Attribute;
                     }
                 }
 
-                $Controller = $Route[self::Controller]->newInstance();
+                $ControllerReflection = $Route[self::Controller];
 
-                foreach ($Route[self::Controller]->getProperties() as $ControllerProperty) {
+                do {
+                    foreach ($ControllerReflection->getAttributes(IRequestFilter::class, ReflectionAttribute::IS_INSTANCEOF) as $Attribute) {
+                        if (!isset($Filters[$Attribute->getName()])) {
+                            $Filters[$Attribute->getName()] = $Attribute;
+                        }
+                    }
+                } while ($ControllerReflection = $ControllerReflection->getParentClass());
+
+                foreach ($Filters as $Filter) {
+                    $IRequestFilter = $Filter->newInstance();
+                    $IRequestFilterClass = new ReflectionClass($IRequestFilter::class);
+                    foreach ($IRequestFilterClass->getProperties() as $IRequestFilterProperty) {
+                        $Singleton = $IRequestFilterProperty->getAttributes(Singleton::class);
+                        if (!empty($Singleton)) {
+                            $Singleton = $Singleton[0]->newInstance();
+                            $ControllerPropertyType = $IRequestFilterProperty->getType();
+                            $ControllerPropertyValue = Singleton::Get($Singleton->Interface ?? $ControllerPropertyType->getName());
+                            $IRequestFilterProperty->setValue($IRequestFilter, $ControllerPropertyValue);
+                        }
+                    }
+                    $Filter = $IRequestFilter->Filter();
+                    if ($Filter !== null) {
+                        return $Filter;
+                    }
+                }
+
+                $ControllerReflection = $Route[self::Controller];
+
+                $Controller = $ControllerReflection->newInstance();
+
+                foreach ($ControllerReflection->getProperties() as $ControllerProperty) {
                     $Singleton = $ControllerProperty->getAttributes(Singleton::class);
                     if (!empty($Singleton)) {
+                        $Singleton = $Singleton[0]->newInstance();
                         $ControllerPropertyType = $ControllerProperty->getType();
-                        $ControllerPropertyValue = Singleton::Get($ControllerPropertyType->getName());
+                        $ControllerPropertyValue = Singleton::Get($Singleton->Interface ?? $ControllerPropertyType->getName());
                         $ControllerProperty->setValue($Controller, $ControllerPropertyValue);
                     }
                 }
@@ -211,7 +232,7 @@ final class Router
 
                 $Hashids = isset($_GET[Hashids::IdParameter]) ? Hashids::Decode($_GET[Hashids::IdParameter]) : [];
 
-                foreach ($Route[self::Method]->GetParameters() as $RouteParameter) {
+                foreach ($MethodReflection->GetParameters() as $RouteParameter) {
                     $Parameter = $RouteParameter->getAttributes(Parameter::class, ReflectionAttribute::IS_INSTANCEOF);
 
                     $Parameter = !empty($Parameter) ? $Parameter[0]->newInstance() : new Parameter();
@@ -249,14 +270,14 @@ final class Router
                     $RouteParameters[$RouteParameter->getName()] = $RouteParameterValue;
                 }
 
-                return $Route[self::Method]->invoke($Controller, ...$RouteParameters);
+                return $MethodReflection->invoke($Controller, ...$RouteParameters);
             }
 
             throw new Exception('Route not found: ' . self::XssClean((string) ($_GET[self::Route])), StatusCode::NotFound);
         } catch (Throwable $Exception) {
             $StatusCode = $Exception instanceof Exception ? $Exception->StatusCode : StatusCode::InternalServerError;
 
-            return new ExceptionResponse($StatusCode, $Exception);
+            return new ExceptionResponse($Exception, $StatusCode);
         }
     }
 }

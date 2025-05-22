@@ -2,6 +2,7 @@
 
 namespace PhpFramework\Layout\Bootstrap;
 
+use Config;
 use PhpFramework\Html\Components\Script as ComponentsScript;
 use PhpFramework\Html\Components\Stylesheet;
 use PhpFramework\Html\FormModal;
@@ -79,7 +80,7 @@ class Admin implements ILayout
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?= new Markup(Dom: 'title', Content: $ViewResponse->Response->Project . ($ViewResponse->Response->Title !== null ? ' - ' . $ViewResponse->Response->Title : '')) ?>
+<?= new Markup(Dom: 'title', Content: Config::$Project . ($ViewResponse->Title !== null ? ' - ' . $ViewResponse->Title : '')) ?>
 <?= $ViewResponse->Stylesheets ?>
 </head>
 <body>
@@ -87,15 +88,15 @@ class Admin implements ILayout
 	<aside class="fixed-top offcanvas-md offcanvas-start text-bg-dark px-2 col-md-2" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
 		<div class="d-flex flex-column vh-100">
 			<div class="d-flex flex-row py-3 w-100">
-                <?= $ViewResponse->Response instanceof Brand ? $ViewResponse->Response->Brand() : null ?>
+                <?= $ViewResponse instanceof Brand ? $ViewResponse->Brand() : null ?>
 				<a class="btn btn-sm btn-dark d-md-none py-0 mx-0 align-self-center" role="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="true" aria-label="Toggle navigation">
 					<i class="fa fa-close fa-fw"></i>
 				</a>
 			</div>
 			<div class="mt-2 mb-auto overflow-auto">
-                <?= $ViewResponse->Response instanceof Menu ? $ViewResponse->Response->Menu() : null ?>
+                <?= $ViewResponse instanceof Menu ? $ViewResponse->Menu() : null ?>
 			</div>
-			<?= $ViewResponse->Response instanceof User ? $ViewResponse->Response->User() : null ?>
+			<?= $ViewResponse instanceof User ? $ViewResponse->User() : null ?>
 		</div>
 	</aside>
 	<header class="fixed-top navbar navbar-dark bg-dark p-0 offset-md-2 col-md-10">
@@ -108,7 +109,7 @@ class Admin implements ILayout
 				</li>
 			</ul>
 			<div class="d-flex ms-auto">
-                <?= $ViewResponse->Response instanceof Navbar ? $ViewResponse->Response->Navbar() : null ?>
+                <?= $ViewResponse instanceof Navbar ? $ViewResponse->Navbar() : null ?>
 			</div>
 		</div>
 	</header>
@@ -119,10 +120,10 @@ class Admin implements ILayout
 		<div class="shadow sticky-top d-flex justify-content-between flex-wrap align-items-center text-primary bg-secondary-subtle py-2 px-3 border-bottom border-primary" style="top:54px;">
             <h5 class="card-title my-2">
                 <?= new Markup(
-            Dom: 'span',
-            Content: $ViewResponse->Response->Title,
-            Icon: $ViewResponse->Response->Icon
-        ) ?>
+                    Dom: 'span',
+                    Content: $ViewResponse->Title,
+                    Icon: $ViewResponse->Icon
+                ) ?>
             </h5>
             <div class="card-tools ms-auto my-1">
                 <?= $ViewResponse instanceof Toolbar ? $ViewResponse->Toolbar() : null ?>

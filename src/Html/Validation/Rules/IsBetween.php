@@ -2,8 +2,8 @@
 
 namespace PhpFramework\Html\Validation\Rules;
 
-use PhpFramework\Database\Attributes\Field;
-use PhpFramework\Database\DbTable;
+use LiliDb\Interfaces\IField;
+use LiliDb\Interfaces\ITable;
 use PhpFramework\Html\Validation\IValidationRule;
 
 class IsBetween implements IValidationRule
@@ -15,7 +15,7 @@ class IsBetween implements IValidationRule
     public function __construct(
         ?string $NotValidMessage,
         ?string $Helper,
-        ?Field &$Field,
+        ?IField &$Field,
         public int $Min,
         public int $Max
     ) {
@@ -23,7 +23,7 @@ class IsBetween implements IValidationRule
         $this->Helper = $Helper;
     }
 
-    public function Validate(mixed $Value, ?DbTable $Table = null): bool
+    public function Validate(mixed $Value, ?ITable $Table = null): bool
     {
         return $Value >= $this->Min && $Value <= $this->Max;
     }

@@ -2,8 +2,8 @@
 
 namespace PhpFramework\Html\Validation\Rules;
 
-use PhpFramework\Database\Attributes\Field;
-use PhpFramework\Database\DbTable;
+use LiliDb\Interfaces\IField;
+use LiliDb\Interfaces\ITable;
 use PhpFramework\Html\Validation\IValidationRule;
 
 class IsValidDecimal implements IValidationRule
@@ -15,7 +15,7 @@ class IsValidDecimal implements IValidationRule
     public function __construct(
         ?string $NotValidMessage = null,
         ?string $Helper = null,
-        ?Field &$Field = null,
+        ?IField &$Field = null,
         public int $NumericoMax = 8,
         public int $DecimalMax = 2
     ) {
@@ -23,7 +23,7 @@ class IsValidDecimal implements IValidationRule
         $this->Helper = $Helper;
     }
 
-    public function Validate(mixed $Value, ?DbTable $Table = null): bool
+    public function Validate(mixed $Value, ?ITable $Table = null): bool
     {
         return preg_match(static::RegexDecimal($this->NumericoMax, $this->DecimalMax), $Value);
     }

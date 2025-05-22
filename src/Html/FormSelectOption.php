@@ -2,9 +2,7 @@
 
 namespace PhpFramework\Html;
 
-use PhpFramework\Database\DbTable;
-
-class FormSelectOption extends DbTable
+class FormSelectOption
 {
     public function __construct(
         public mixed $Text = null,
